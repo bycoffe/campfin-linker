@@ -7,27 +7,8 @@ from fec.db import *
 from fec.match import Match
 from fec.trainer import *
 
-CHUNK_SIZE = 5000
 CONFIDENCE_KEEP = 0.89
 CONFIDENCE_CHECK = 0.51
-
-def fill_empty_last_names():
-    print "Setting empty last names in individual_contributions"
-    while num_unfilled_last_names() > 0:
-        print '  ' + str(num_unfilled_last_names()) + ' remaining...'
-        dbc.execute("update individual_contributions set contributor_last_name = substring_index(contributor_name,',',1) where contributor_last_name is null limit 100000")
-        db.commit()
-
-def num_unfilled_last_names():
-    dbc.execute("select count(*) as cnt from individual_contributions where contributor_last_name is null")
-    return dbc.fetchone()['cnt']
-
-def next_contributor_id():
-    dbc.execute("select max(id) as maxid from contributors")
-    maxid = dbc.fetchone()['maxid']
-    if maxid == None:
-        maxid = 0
-    return maxid + 1
 
 def contribution_features(contribution):
     if contribution['id'] in contribution_names:
@@ -51,29 +32,6 @@ def contribution_features(contribution):
 def name_key(contribution):
     return contribution['contributor_name'] + '|' + contribution['state']
 
-def create_contributors(contributors):
-    if len(contributors) > 0:
-        dbc.executemany(
-        """insert into contributors (id, full_name, first_name, middle_name, last_name, city, state, zipcode, employer, occupation)
-        values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-        ((c['id'], c['full_name'], c['first_name'], c['middle_name'], c['last_name'], c['city'], c['state'], c['zipcode'], c['employer'], c['occupation']) for c in contributors)
-        )
-        db.commit()
-
-def save_contributions(contributions):
-    for c in contributions:
-        dbc.execute("update individual_contributions set contributor_id = %s where id = %s", (c['contributor_id'], c['id']))
-    db.commit()
-
-def create_new_possible_matches(new_possible_matches):
-    if len(new_possible_matches) > 0:
-        dbc.executemany(
-        """insert into contributor_matches (individual_contribution_id, contributor_id, confidence)
-        values (%s, %s, %s)""",
-        ((m['individual_contribution_id'], m['contributor_id'], m['confidence']) for m in new_possible_matches)
-        )
-        db.commit()
-
 # Find the first matching contributor in a list
 def first_matching_contributor_id(contribution, contributors, new_possible_matches):
     possible_matches_to_add = []
@@ -93,13 +51,12 @@ def first_matching_contributor_id(contribution, contributors, new_possible_match
     return None
 
 def match_contributions():
-    max_contributor_id = next_contributor_id()
+    max_contributor_id = db.next_contributor_id()
     ts_start = datetime.now()
     while True:
 
         # Get the next batch of contributions to process
-        dbc.execute("select id, contributor_name, city, state, zipcode, employer, occupation, contributor_last_name, contributor_id from individual_contributions where contributor_id is null limit %s", CHUNK_SIZE)
-        unlinked_contributions = dbc.fetchall()
+        unlinked_contributions = db.next_unlinked_contributions()
         if len(unlinked_contributions) == 0:
             break
 
@@ -117,8 +74,7 @@ def match_contributions():
             cnt += 1
 
             # Get potential contributors for this contribution
-            dbc.execute("select * from contributors where last_name = %s and state = %s order by id", (uc['contributor_last_name'], uc['state']))
-            contributors = dbc.fetchall()
+            contributors = db.potential_contributors(uc)
 
             # Find match in contributors
             contributor_id = first_matching_contributor_id(uc, contributors, new_possible_matches)
@@ -134,14 +90,15 @@ def match_contributions():
             # Link the contribution
             uc['contributor_id'] = contributor_id
 
-        create_contributors(new_contributors)
-        save_contributions(unlinked_contributions)
-        create_new_possible_matches(new_possible_matches)
+        db.create_contributors(new_contributors)
+        db.save_contributions(unlinked_contributions)
+        db.create_new_possible_matches(new_possible_matches)
 
         print "Processed " + str(cnt) + " contributions in " + str(datetime.now() - ts_start)
         ts_start = datetime.now()
 
-fill_empty_last_names()
+db = DB()
+db.fill_empty_last_names()
 trainer = Trainer()
 clf = trainer.train()
 contribution_names = {}
