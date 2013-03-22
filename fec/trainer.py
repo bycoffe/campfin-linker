@@ -11,11 +11,11 @@ class Trainer(object):
 
     def __init__(self):
         self.initial_sim = 0.1
-        self.fields = ["id", "import_reference_id", "cycle", "transaction_namespace", "transaction_id", "transaction_type", "filing_id", "is_amendment", "amount", "date", "full_name", "contributor_ext_id", "contributor_type", "occupation", "employer", "contributor_gender", "contributor_address", "city", "state", "zipcode", "contributor_category", "organization_name", "organization_ext_id", "parent_organization_name", "parent_organization_ext_id", "recipient_name", "recipient_ext_id", "recipient_party", "recipient_type", "recipient_state", "recipient_state_held", "recipient_category", "committee_name", "committee_ext_id", "committee_party", "candidacy_status", "district", "district_held", "seat", "seat_held", "seat_status", "seat_result"]
         self.last_name_groups = defaultdict(list)
         self.training_set_size = 1000000
         self.input_file = "data/crp_slice.csv"
         self.output_file = 'data/training_matches.p'
+        self.input_file_fields = ["id", "import_reference_id", "cycle", "transaction_namespace", "transaction_id", "transaction_type", "filing_id", "is_amendment", "amount", "date", "full_name", "contributor_ext_id", "contributor_type", "occupation", "employer", "contributor_gender", "contributor_address", "city", "state", "zipcode", "contributor_category", "organization_name", "organization_ext_id", "parent_organization_name", "parent_organization_ext_id", "recipient_name", "recipient_ext_id", "recipient_party", "recipient_type", "recipient_state", "recipient_state_held", "recipient_category", "committee_name", "committee_ext_id", "committee_party", "candidacy_status", "district", "district_held", "seat", "seat_held", "seat_status", "seat_result"]
 
     def generate_training_set(self, training_set_size=None):
         if training_set_size != None:
@@ -75,7 +75,7 @@ class Trainer(object):
         n=0
         for row in csv.reader(open(self.input_file), delimiter=',', quotechar='"'):
             n += 1
-            row = dict(zip(self.fields, row))
+            row = dict(zip(self.input_file_fields, row))
             row['full_name'] = row['full_name'].upper()
             row['city'] = row['city'].upper()
             row['state'] = row['state'].upper()
