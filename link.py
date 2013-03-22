@@ -5,24 +5,11 @@ import cPickle as pickle
 from sklearn.ensemble import RandomForestClassifier
 from fec.db import *
 from fec.match import Match
-from fec.preprocessor import *
+from fec.trainer import *
 
 CHUNK_SIZE = 5000
 CONFIDENCE_KEEP = 0.89
 CONFIDENCE_CHECK = 0.51
-
-def train_classifier(training_matches):
-    print "Training classifier"
-    c = RandomForestClassifier(n_estimators=10, random_state=0)
-    c = c.fit([eval(t.features) for t in training_matches], [int(t.matchpct) for t in training_matches])
-    return c
-
-def load_training_matches():
-    print "Loading training matches"
-    match_file = open('data/training_matches.p', 'rb')
-    tm = pickle.load(match_file)
-    match_file.close()
-    return tm
 
 def fill_empty_last_names():
     print "Setting empty last names in individual_contributions"
@@ -94,9 +81,9 @@ def first_matching_contributor_id(contribution, contributors, new_possible_match
         c1f, c2f = contribution_features(contribution), c
         compstring1 = '%s %s %s' % (c1f['first_name'], c1f['city'], c1f['state'])
         compstring2 = '%s %s %s' % (c2f['first_name'], c2f['city'], c2f['state'])
-        if preprocessor._jaccard_sim(preprocessor._shingle(compstring1.lower(), 2), preprocessor._shingle(compstring2.lower(), 2)) < preprocessor.initial_sim:
+        if trainer.jaccard_sim(trainer.shingle(compstring1.lower(), 2), trainer.shingle(compstring2.lower(), 2)) < trainer.initial_sim:
             continue
-        featurevector = str(create_featurevector(c1f, c2f))
+        featurevector = str(trainer.create_featurevector(c1f, c2f))
         edge = clf.predict_proba(eval(featurevector))
         if edge[0][1] > CONFIDENCE_KEEP:
             return c['id']
@@ -155,8 +142,8 @@ def match_contributions():
         ts_start = datetime.now()
 
 fill_empty_last_names()
-clf = train_classifier(load_training_matches())
-preprocessor = Preprocessor()
+trainer = Trainer()
+clf = trainer.train()
 contribution_names = {}
 match_contributions()
 

@@ -1,7 +1,7 @@
 import os
-from fec.preprocessor import *
+from fec.trainer import *
 
 if not os.path.isfile("data/crp_slice.csv"):
     os.system("unzip data/crp_slice.zip -d data")
 
-Preprocessor().preprocess("data/crp_slice.csv")
+Trainer().generate_training_set()
