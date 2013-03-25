@@ -1,5 +1,3 @@
-CREATE DATABASE IF NOT EXISTS fec;
-
 CREATE TABLE IF NOT EXISTS `individuals` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `full_name` varchar(255) DEFAULT NULL,

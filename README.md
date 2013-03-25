@@ -18,6 +18,7 @@ After you've gone through the process once, it will be easier to link a differen
 
 Create a database and three tables for your linkage:
 
+    mysqladmin -u root create fec
     mysql -u root fec < data/create.sql
 
 Create a local database.json and edit the fec connection properties to match your system:
