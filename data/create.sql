@@ -1,4 +1,35 @@
-CREATE TABLE `individual_contributions` (
+CREATE DATABASE IF NOT EXISTS fec;
+
+CREATE TABLE IF NOT EXISTS `individuals` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) DEFAULT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `middle_name` varchar(255) DEFAULT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `state` varchar(255) DEFAULT NULL,
+  `zipcode` varchar(255) DEFAULT NULL,
+  `employer` varchar(255) DEFAULT NULL,
+  `occupation` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_individuals_on_last_name` (`last_name`)
+);
+
+CREATE TABLE IF NOT EXISTS `individual_possible_matches` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `canonical_id` int(11) DEFAULT NULL,
+  `object_table` varchar(255) DEFAULT NULL,
+  `object_id` int(11) DEFAULT NULL,
+  `confidence` float DEFAULT NULL,
+  `resolved` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `index_individual_possible_matches_on_canonical_id` (`canonical_id`),
+  KEY `index_individual_possible_matches_on_object_table` (`object_table`),
+  KEY `index_individual_possible_matches_on_object_id` (`object_id`),
+  KEY `index_individual_possible_matches_on_resolved` (`resolved`)
+);
+
+CREATE TABLE IF NOT EXISTS `individual_contributions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `committee_id` varchar(255) DEFAULT NULL,
   `amendment` varchar(255) DEFAULT NULL,
@@ -26,33 +57,4 @@ CREATE TABLE `individual_contributions` (
   PRIMARY KEY (`id`),
   KEY `index_individual_contributions_on_individual_id` (`individual_id`),
   KEY `index_individual_contributions_on_contributor_last_name` (`contributor_last_name`)
-);
-
-CREATE TABLE `individuals` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `full_name` varchar(255) DEFAULT NULL,
-  `first_name` varchar(255) DEFAULT NULL,
-  `middle_name` varchar(255) DEFAULT NULL,
-  `last_name` varchar(255) DEFAULT NULL,
-  `city` varchar(255) DEFAULT NULL,
-  `state` varchar(255) DEFAULT NULL,
-  `zipcode` varchar(255) DEFAULT NULL,
-  `employer` varchar(255) DEFAULT NULL,
-  `occupation` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `index_individuals_on_last_name` (`last_name`)
-);
-
-CREATE TABLE `individual_possible_matches` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `canonical_id` int(11) DEFAULT NULL,
-  `object_table` varchar(255) DEFAULT NULL,
-  `object_id` int(11) DEFAULT NULL,
-  `confidence` float DEFAULT NULL,
-  `resolved` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `index_individual_possible_matches_on_canonical_id` (`canonical_id`),
-  KEY `index_individual_possible_matches_on_object_table` (`object_table`),
-  KEY `index_individual_possible_matches_on_object_id` (`object_id`),
-  KEY `index_individual_possible_matches_on_resolved` (`resolved`)
 );
