@@ -13,7 +13,7 @@ provides a great deal of background on the methods used within.
 ## Getting started
 
 We suggest you follow these steps the first time you link a dataset. This guide will create the necessary mysql schema
-for running a linkage, then download, import, and link FEC some individual contribution data for the 2014 election cycle.
+for running a linkage, then download, import, and link some FEC individual contribution data for the 2014 election cycle.
 After you've gone through the process once, it will be easier to link a different set of contributions.
 
 Create a database and three tables (individuals, individual_contributions, individual_possible_matches) for your linkage:
@@ -46,7 +46,7 @@ sizes of those tables represent multiple contributions by a person. Each contrib
 individual by the *canonical_id* field.
 
 The *individual_possible_matches* table contains roughly 170 records, which represent the pairs that didn't satisfy the threshold
-to be considered a match by the learning algorithm, but possibly are. These possible matches can be resolved with the resolve.py
+to be considered a match by the learning algorithm, but possibly are. These potential matches can be resolved with the resolve.py
 script, or you could use another method to determine whether they're actually matches. They can also be ignored, which would result in
 a slightly less precise linkage.
 
@@ -60,7 +60,7 @@ Linking a second dataset is easier than linking the first. The steps are:
 
     python link.py --table=new_table
 
-This second linkage shares the *individuals* table with the first linkage, so some records from the 2014 cycle may be linked to
+This second linkage shares the *individuals* table with the first linkage, so some individuals from the 2014 cycle may now be linked to
 the dataset you just imported.
 
 Note that rather than creating a new table, you could also just append new records to the same *individual_contributions* table you used
