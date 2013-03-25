@@ -3,4 +3,4 @@ config/database.json
 *.p
 *.csv
 data/indiv14.zip
-itcont.txt
+itcont*.txt
