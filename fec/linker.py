@@ -8,8 +8,8 @@ CONFIDENCE_CHECK = 0.51
 
 class Linker(object):
 
-    def __init__(self):
-        self.db = DB()
+    def __init__(self, dbname, table):
+        self.db = DB(dbname, table)
         self.trainer = Trainer()
         self.contribution_names = {}
 
@@ -28,15 +28,15 @@ class Linker(object):
 
             self.contribution_names = {}
             new_contributors = []
-            used__name_keys = {}
+            used_name_keys = {}
             new_possible_matches = []
             cnt = 0
             for uc in unlinked_contributions:
 
                 # Don't process the same last_name|state twice in this round because the match could be in new_contributors and uncommitted
-                if self._name_key(uc) in used__name_keys:
+                if self._name_key(uc) in used_name_keys:
                     continue
-                used__name_keys[self._name_key(uc)] = True
+                used_name_keys[self._name_key(uc)] = True
                 cnt += 1
 
                 # Get potential contributors for this contribution
@@ -54,7 +54,7 @@ class Linker(object):
                     contributor_id = contributor['id']
 
                 # Link the contribution
-                uc['contributor_id'] = contributor_id
+                uc['canonical_id'] = contributor_id
 
             self.db.create_contributors(new_contributors)
             self.db.save_contributions(unlinked_contributions)
@@ -77,7 +77,7 @@ class Linker(object):
             if edge[0][1] > CONFIDENCE_KEEP:
                 return c['id']
             elif edge[0][1] > CONFIDENCE_CHECK:
-                possible_matches_to_add.append({'individual_contribution_id': contribution['id'], 'contributor_id': c['id'], 'confidence': edge[0][1]})
+                possible_matches_to_add.append({'object_id': contribution['id'], 'canonical_id': c['id'], 'confidence': edge[0][1]})
         new_possible_matches.extend(possible_matches_to_add)
         return None
 
@@ -85,11 +85,11 @@ class Linker(object):
         if contribution['id'] in self.contribution_names:
             parsed_name = self.contribution_names[contribution['id']]
         else:
-            human_name = HumanName(contribution['contributor_name'])
+            human_name = HumanName(contribution['full_name'])
             parsed_name = {'first': human_name.first, 'middle': human_name.middle, 'last': human_name.last}
             self.contribution_names[contribution['id']] = parsed_name
         return {
-            'full_name': contribution['contributor_name'],
+            'full_name': contribution['full_name'],
             'first_name' : parsed_name['first'],
             'middle_name' : parsed_name['middle'],
             'last_name' : parsed_name['last'],
@@ -101,4 +101,4 @@ class Linker(object):
         }
 
     def _name_key(self, contribution):
-        return contribution['contributor_name'] + '|' + contribution['state']
+        return contribution['last_name'] + '|' + contribution['state']

@@ -1,0 +1,48 @@
+{
+  "databases": {
+    "fec": {
+      "connection": {
+        "host": "localhost",
+        "db": "fec",
+        "user": "root",
+        "passwd": ""
+      },
+      "linkable_tables": {
+        "individual_contributions": {
+          "id": "id",
+          "canonical_id": "contributor_id",
+          "full_name": "contributor_name",
+          "first_name" : "",
+          "middle_name" : "",
+          "last_name" : "contributor_last_name",
+          "city": "city",
+          "state": "state",
+          "zipcode": "zipcode",
+          "employer": "employer",
+          "occupation": "occupation"
+        }
+      }
+    }
+  },
+  "canonical": {
+    "database": "fec",
+    "table_name": "individuals",
+    "id": "id",
+    "full_name": "full_name",
+    "first_name" : "first_name",
+    "middle_name" : "middle_name",
+    "last_name" : "last_name",
+    "city": "city",
+    "state": "state",
+    "zipcode": "zipcode",
+    "employer": "employer",
+    "occupation": "occupation"
+  },
+  "possibles": {
+    "database": "fec",
+    "table_name": "individual_possible_matches",
+    "object_id": "id",
+    "canonical_id": "individual_id"
+  }
+}
+

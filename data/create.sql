@@ -22,13 +22,13 @@ CREATE TABLE `individual_contributions` (
   `memo_text` varchar(255) DEFAULT NULL,
   `sub_id` int(11) DEFAULT NULL,
   `contributor_last_name` varchar(255) DEFAULT NULL,
-  `contributor_id` int(11) DEFAULT NULL,
+  `individual_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `index_individual_contributions_on_contributor_id` (`contributor_id`),
+  KEY `index_individual_contributions_on_individual_id` (`individual_id`),
   KEY `index_individual_contributions_on_contributor_last_name` (`contributor_last_name`)
-)
+);
 
-CREATE TABLE `contributors` (
+CREATE TABLE `individuals` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `full_name` varchar(255) DEFAULT NULL,
   `first_name` varchar(255) DEFAULT NULL,
@@ -40,17 +40,19 @@ CREATE TABLE `contributors` (
   `employer` varchar(255) DEFAULT NULL,
   `occupation` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `index_contributors_on_last_name` (`last_name`)
-)
+  KEY `index_individuals_on_last_name` (`last_name`)
+);
 
-CREATE TABLE `contributor_matches` (
+CREATE TABLE `individual_partial_matches` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `individual_contribution_id` int(11) DEFAULT NULL,
-  `contributor_id` varchar(255) DEFAULT NULL,
+  `individual_id` int(11) DEFAULT NULL,
+  `object_table` varchar(255) DEFAULT NULL,
+  `object_id` int(11) DEFAULT NULL,
   `confidence` float DEFAULT NULL,
   `resolved` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `index_contributor_matches_on_individual_contribution_id` (`individual_contribution_id`),
-  KEY `index_contributor_matches_on_contributor_id` (`contributor_id`),
-  KEY `index_contributor_matches_on_resolved` (`resolved`)
-)
+  KEY `index_individual_partial_matches_on_individual_id` (`individual_id`),
+  KEY `index_individual_partial_matches_on_object_table` (`object_table`),
+  KEY `index_individual_partial_matches_on_object_id` (`object_id`),
+  KEY `index_individual_partial_matches_on_resolved` (`resolved`)
+);

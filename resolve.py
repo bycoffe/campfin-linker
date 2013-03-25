@@ -1,6 +1,16 @@
+from optparse import OptionParser
 from fec.db import *
 
-db = DB()
+parser = OptionParser()
+parser.add_option("-d", "--db", dest="dbname",
+                  default="fec",
+                  help="Database name with data to resolve")
+parser.add_option("-t", "--table",
+                  default="individual_contributions",
+                  help="Name of table to resolve")
+(options, args) = parser.parse_args()
+
+db = DB(options.dbname, options.table)
 
 while True:
 
