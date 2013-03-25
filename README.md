@@ -16,25 +16,25 @@ We suggest you follow these steps the first time you link a dataset. This guide 
 for running a linkage, then download, import, and link FEC individual contribution data for the 2014 election cycle.
 After you've gone through the process once, it will be easier to link a different set of contributions.
 
-1. Create a database and three tables for your linkage:
+Create a database and three tables for your linkage:
 
     mysql -u root fec < data/create.sql
 
-2. Create a local database.json and edit the fec connection properties to match your system:
+Create a local database.json and edit the fec connection properties to match your system:
 
     cp config/database.sample.json config/database.json
 
-3. Download and import 2014 individual contributions to be linked:
+Download and import 2014 individual contributions to be linked:
 
     curl -s ftp://ftp.fec.gov/FEC/2014/indiv14.zip > data/indiv14.zip
     unzip data/indiv14.zip -d data
     mysql -u root fec -e "LOAD DATA LOCAL INFILE 'data/itcont.txt' INTO TABLE individual_contributions FIELDS TERMINATED BY '|'"
 
-4. Create the training set needed to run all linkages:
+Create the training set needed to run all linkages:
 
     python train.py
 
-5. Link the 2014 individual contribution data:
+Link the 2014 individual contribution data:
 
     python link.py
 
