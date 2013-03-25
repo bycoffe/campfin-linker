@@ -50,6 +50,31 @@ to be considered a match by the learning algorithm, but possibly are. These poss
 script, or you could use another method to determine whether they're actually matches. They can also be ignored, which would result in
 a slightly less precise linkage.
 
+## Linking a second dataset
+
+Linking a second dataset is easier than linking the first. The steps are:
+
+1. Create a table with the new data
+2. Add your new table to *linkable_tables* in *database.json*. You can override field names for the new table if it's convenient
+3. Link the new dataset by specifying the new table name:
+
+    python link.py --table=new_table
+
+This second linkage shares the *individuals* table with the first linkage, so some records from the 2014 cycle may be linked to
+the dataset you just imported.
+
+Note that rather than creating a new table, you could also just append new records to the same *individual_contributions* table you used
+for the example linkage and rerun the linkage, as long as you don't delete the existing data in the *canonical_id* field.
+
+## Methodology
+
+## Notes
+
+Linking larger datasets can take a long time -- the set of 3.5 million 2012 contributions takes about 5 hours to link on a decent
+computer. You can kill and restart the link.py script at any point without hurting anything. If necessary, it would be fairly easy to parallelize the
+process so the script can be run on multiple machines, each of which pulls out (and locks) some records to link until there are no records
+left.
+
 ## Authors
 
 - Jay Boice, jay.boice@huffingtonpost.com
