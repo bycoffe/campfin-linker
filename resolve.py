@@ -18,8 +18,8 @@ while True:
     if match == None:
         break
 
-    print "%s, %s %s %s (%s - %s)" % (match['contributor_name'], match['city'], match['state'], match['zipcode'], match['occupation'], match['employer'])
-    print "%s, %s %s %s (%s - %s)" % (match['full_name'], match['contributors.city'], match['contributors.state'], match['contributors.zipcode'], match['contributors.occupation'], match['contributors.employer'])
+    print "%s, %s %s %s (%s - %s)" % (match['name1'], match['city1'], match['state1'], match['zip1'], match['occupation1'], match['employer1'])
+    print "%s, %s %s %s (%s - %s)" % (match['name2'], match['city2'], match['state2'], match['zip2'], match['occupation2'], match['employer2'])
 
     key = ''
     while key != 'Y' and key != 'N':

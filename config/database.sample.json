@@ -40,9 +40,7 @@
   },
   "possibles": {
     "database": "fec",
-    "table_name": "individual_possible_matches",
-    "object_id": "id",
-    "canonical_id": "individual_id"
+    "table_name": "individual_possible_matches"
   }
 }
 

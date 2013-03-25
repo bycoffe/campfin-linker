@@ -84,7 +84,7 @@ class DB(object):
 
     def create_new_possible_matches(self, new_possible_matches):
         if len(new_possible_matches) > 0:
-            str_insert = "insert into %s (%s, object_table, object_id, confidence)" % (self.possible_config['table_name'], self.possible_config['canonical_id'])
+            str_insert = "insert into %s (canonical_id, object_table, object_id, confidence)" % (self.possible_config['table_name'])
             self.dbcs['possibles'].executemany(str_insert + """
               values (%s, %s, %s, %s)
               """,
@@ -93,16 +93,17 @@ class DB(object):
 
     def r_get_next_possible_match(self):
         self.dbcs['possibles'].execute("""
-          select *
+          select %s.id as id, %s.object_id as object_id, %s.canonical_id as canonical_id, %s.%s as name1, %s.%s as name2, %s.%s as city1, %s.%s as city2, %s.%s as state1, %s.%s as state2, %s.%s as zip1, %s.%s as zip2, %s.%s as occupation1, %s.%s as occupation2, %s.%s as employer1, %s.%s as employer2
           from %s, %s, %s
           where resolved = false and
-            %s.%s = %s.%s and
+            %s.canonical_id = %s.%s and
             %s.object_table = '%s' and
             %s.object_id = %s.%s
-          order by %s.%s
+          order by %s.canonical_id
           limit 1
         """ %
-        (self.possible_config['table_name'], self.table, self.canonical_config['table_name'], self.possible_config['table_name'], self.possible_config['canonical_id'], self.canonical_config['table_name'], self.canonical_config['id'], self.possible_config['table_name'], self.table, self.possible_config['table_name'], self.table, self.table_config['id'], self.possible_config['table_name'], self.possible_config['canonical_id']))
+        (self.possible_config['table_name'], self.possible_config['table_name'], self.possible_config['table_name'], self.table, self.table_config['full_name'], self.canonical_config['table_name'], self.canonical_config['full_name'], self.table, self.table_config['city'], self.canonical_config['table_name'], self.canonical_config['city'], self.table, self.table_config['state'], self.canonical_config['table_name'], self.canonical_config['state'], self.table, self.table_config['zipcode'], self.canonical_config['table_name'], self.canonical_config['zipcode'], self.table, self.table_config['occupation'], self.canonical_config['table_name'], self.canonical_config['occupation'], self.table, self.table_config['employer'], self.canonical_config['table_name'], self.canonical_config['employer'],
+        self.possible_config['table_name'], self.table, self.canonical_config['table_name'], self.possible_config['table_name'], self.canonical_config['table_name'], self.canonical_config['id'], self.possible_config['table_name'], self.table, self.possible_config['table_name'], self.table, self.table_config['id'], self.possible_config['table_name']))
         return self.dbcs['possibles'].fetchone()
 
     def r_ignore_match(self, match):
@@ -110,6 +111,6 @@ class DB(object):
         self.dbs['possibles'].commit()
 
     def r_resolve_match(self, match):
-        self.dbcs['possibles'].execute("update individual_contributions set contributor_id = %s where id = %s", (match['contributor_id'], match['individual_contribution_id']))
-        self.dbcs['possibles'].execute("update contributor_matches set resolved = true where individual_contribution_id = %s", match['individual_contribution_id'])
+        self.dbcs['possibles'].execute("update %s set %s = %s where id = %s" % (self.table, self.table_config['canonical_id'], match['canonical_id'], match['object_id']))
+        self.dbcs['possibles'].execute("update %s set resolved = true where object_table = '%s' and object_id = %s" % (self.possible_config['table_name'], self.table, match['object_id']))
         self.dbs['possibles'].commit()
