@@ -12,31 +12,29 @@ class DB(object):
         self.table = self.db_config['databases'][self.dbname]['linkable_tables'].keys()[0] if table == None else table
         self.canonical_config = self.db_config['canonical']
         self.possible_config = self.db_config['possibles']
-        if self.dbname:
-            self.table_config = self.db_config['databases'][self.dbname]['linkable_tables'][self.table]
+        self.table_config = self.db_config['databases'][self.dbname]['linkable_tables'][self.table]
         self.dbs = {"canonical": MySQLdb.connect(**self.db_config['databases'][self.db_config['canonical']['database']]['connection']),
-                    "possibles": MySQLdb.connect(**self.db_config['databases'][self.db_config['possibles']['database']]['connection'])}
+                    "possibles": MySQLdb.connect(**self.db_config['databases'][self.db_config['possibles']['database']]['connection']),
+                    "linker": MySQLdb.connect(**self.db_config['databases'][self.dbname]['connection'])}
         self.dbcs = {"canonical": self.dbs["canonical"].cursor(MySQLdb.cursors.DictCursor),
-                    "possibles": self.dbs["possibles"].cursor(MySQLdb.cursors.DictCursor)}
-        if self.dbname:
-            self.dbs['linker'] = MySQLdb.connect(**self.db_config['databases'][self.dbname]['connection'])
-            self.dbcs['linker'] = self.dbs["linker"].cursor(MySQLdb.cursors.DictCursor)
+                    "possibles": self.dbs["possibles"].cursor(MySQLdb.cursors.DictCursor),
+                    "linker": self.dbs["linker"].cursor(MySQLdb.cursors.DictCursor)}
 
     def fill_empty_last_names(self):
-        print "Setting empty last names in individual_contributions"
+        print "Setting empty last names"
         while self.num_unfilled_last_names() > 0:
             print '  ' + str(self.num_unfilled_last_names()) + ' remaining...'
             self.dbcs['linker'].execute("""
-              update %s set %s = substring_index(%s, ',', 1) where %s is null limit 100000
+              update %s set %s = substring_index(%s, ',', 1) where %s is null or length(%s) = 0 limit 100000
               """ %
-              (self.table, self.table_config['last_name'], self.table_config['full_name'], self.table_config['last_name']))
+              (self.table, self.table_config['last_name'], self.table_config['full_name'], self.table_config['last_name'], self.table_config['last_name']))
             self.dbs['linker'].commit()
 
     def num_unfilled_last_names(self):
         self.dbcs['linker'].execute("""
-          select count(*) as cnt from %s where %s is null
+          select count(*) as cnt from %s where %s is null or length(%s) = 0
           """ %
-          (self.table, self.table_config['last_name']))
+          (self.table, self.table_config['last_name'], self.table_config['last_name']))
         return self.dbcs['linker'].fetchone()['cnt']
 
     def next_contributor_id(self):
