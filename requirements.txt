@@ -1,0 +1,6 @@
+MySQL-python==1.2.4
+nameparser==0.2.7
+numpy==1.7.0
+scikit-learn==0.13.1
+scipy==0.11.0
+simplejson==3.1.2

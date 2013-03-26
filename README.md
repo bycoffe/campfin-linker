@@ -8,7 +8,7 @@ provides a great deal of background on the methods used within.
 
 ## Installation
 
-    pip install MySQL-python==1.2.4 nameparser==0.2.7 numpy==1.7.0 scipy==0.11.0 scikit-learn==0.13.1 simplejson==3.1.2
+    pip install -r requirements.txt
 
 ## Getting started
 
