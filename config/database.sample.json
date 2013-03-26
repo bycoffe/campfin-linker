@@ -1,9 +1,9 @@
 {
   "databases": {
-    "fec": {
+    "fec_linker": {
       "connection": {
         "host": "localhost",
-        "db": "fec",
+        "db": "fec_linker",
         "user": "root",
         "passwd": ""
       },
@@ -25,7 +25,7 @@
     }
   },
   "canonical": {
-    "database": "fec",
+    "database": "fec_linker",
     "table_name": "individuals",
     "id": "id",
     "full_name": "full_name",
@@ -39,7 +39,7 @@
     "occupation": "occupation"
   },
   "possibles": {
-    "database": "fec",
+    "database": "fec_linker",
     "table_name": "individual_possible_matches"
   }
 }
