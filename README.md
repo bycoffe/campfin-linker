@@ -30,7 +30,7 @@ Download and import the first 30,000 individual contributions from the 2014 cycl
     curl -s ftp://ftp.fec.gov/FEC/2014/indiv14.zip > data/indiv14.zip
     unzip data/indiv14.zip -d data
     head -30000 data/itcont.txt > data/itcont2.txt
-    mysql -u root fec -e "LOAD DATA LOCAL INFILE 'data/itcont2.txt' INTO TABLE individual_contributions FIELDS TERMINATED BY '|' (committee_id,amendment,report_type,pgi,image_num,transaction_type,entity_type,contributor_name,ccc,state,zipcode,employer,occupation,transaction_date,amount,other_id,transaction_id,filing_number,memo_code,memo_text,sub_id,contributor_last_name,contributor_id)"
+    mysql -u root fec -e "LOAD DATA LOCAL INFILE 'data/itcont2.txt' INTO TABLE individual_contributions FIELDS TERMINATED BY '|' (committee_id,amendment,report_type,pgi,image_num,transaction_type,entity_type,contributor_name,city,state,zipcode,employer,occupation,transaction_date,amount,other_id,transaction_id,filing_number,memo_code,memo_text,sub_id,contributor_last_name,contributor_id)"
 
 Create the training set needed to run a linkage:
 
