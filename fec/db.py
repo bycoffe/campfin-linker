@@ -25,9 +25,9 @@ class DB(object):
         while self.num_unfilled_last_names() > 0:
             print '  ' + str(self.num_unfilled_last_names()) + ' remaining...'
             self.dbcs['linker'].execute("""
-              update %s set %s = substring_index(%s, ',', 1) where %s is null or length(%s) = 0 limit 100000
+              update %s set %s = if(length(substring_index(%s, ',', 1)) = 0, 'EMPTY', substring_index(%s, ',', 1)) where %s is null or length(%s) = 0 limit 100000
               """ %
-              (self.table, self.table_config['last_name'], self.table_config['full_name'], self.table_config['last_name'], self.table_config['last_name']))
+              (self.table, self.table_config['last_name'], self.table_config['full_name'], self.table_config['full_name'], self.table_config['last_name'], self.table_config['last_name']))
             self.dbs['linker'].commit()
 
     def num_unfilled_last_names(self):

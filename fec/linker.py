@@ -86,20 +86,20 @@ class Linker(object):
         if contribution['id'] in self.contribution_names:
             parsed_name = self.contribution_names[contribution['id']]
         else:
-            human_name = HumanName(contribution['full_name'])
+            human_name = HumanName(contribution['full_name'].upper())
             parsed_name = {'first': human_name.first, 'middle': human_name.middle, 'last': human_name.last}
             self.contribution_names[contribution['id']] = parsed_name
         return {
-            'full_name': contribution['full_name'],
+            'full_name': contribution['full_name'].upper(),
             'first_name' : parsed_name['first'],
             'middle_name' : parsed_name['middle'],
             'last_name' : parsed_name['last'],
-            'city': contribution['city'],
-            'state': contribution['state'],
+            'city': contribution['city'].upper(),
+            'state': contribution['state'].upper(),
             'zipcode': contribution['zipcode'],
-            'employer': contribution['employer'],
-            'occupation': contribution['occupation']
+            'employer': contribution['employer'].upper(),
+            'occupation': contribution['occupation'].upper()
         }
 
     def _name_key(self, contribution):
-        return contribution['last_name'] + '|' + contribution['state']
+        return contribution['last_name'].upper() + '|' + contribution['state'].upper()
