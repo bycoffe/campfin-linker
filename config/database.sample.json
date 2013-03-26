@@ -10,7 +10,7 @@
       "linkable_tables": {
         "individual_contributions": {
           "id": "id",
-          "canonical_id": "contributor_id",
+          "canonical_id": "individual_id",
           "full_name": "contributor_name",
           "first_name" : "",
           "middle_name" : "",
