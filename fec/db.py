@@ -7,9 +7,9 @@ CHUNK_SIZE = 5000
 class DB(object):
 
     def __init__(self, dbname=None, table=None):
-        self.dbname = dbname
-        self.table = table
         self.db_config = json.load(open('config/database.json'))
+        self.dbname = self.db_config['databases'].keys()[0] if dbname == None else dbname
+        self.table = self.db_config['databases'][self.dbname]['linkable_tables'].keys()[0] if table == None else table
         self.canonical_config = self.db_config['canonical']
         self.possible_config = self.db_config['possibles']
         if self.dbname:
