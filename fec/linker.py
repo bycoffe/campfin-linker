@@ -10,7 +10,7 @@ class Linker(object):
 
     def __init__(self, dbname, table):
         self.db = DB(dbname, table)
-        self.table = table
+        self.table = self.db.tablename
         self.trainer = Trainer()
         self.contribution_names = {}
 
