@@ -3,4 +3,5 @@ config/database.yml
 *.p
 *.csv
 data/indiv14.zip
+data/tmp
 itcont*.txt
