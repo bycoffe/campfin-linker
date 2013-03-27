@@ -37,23 +37,6 @@ class DB(object):
             'passwd': db['password']
         }
 
-    def fill_empty_last_names(self):
-        print "Setting empty last names"
-        while self.num_unfilled_last_names() > 0:
-            print '  ' + str(self.num_unfilled_last_names()) + ' remaining...'
-            self.dbcs['linker'].execute("""
-              update %s set %s = if(length(substring_index(%s, ',', 1)) = 0, 'EMPTY', substring_index(%s, ',', 1)) where %s is null or length(%s) = 0 limit 100000
-              """ %
-              (self.tablename, self.table_config['last_name'], self.table_config['full_name'], self.table_config['full_name'], self.table_config['last_name'], self.table_config['last_name']))
-            self.dbs['linker'].commit()
-
-    def num_unfilled_last_names(self):
-        self.dbcs['linker'].execute("""
-          select count(*) as cnt from %s where %s is null or length(%s) = 0
-          """ %
-          (self.tablename, self.table_config['last_name'], self.table_config['last_name']))
-        return self.dbcs['linker'].fetchone()['cnt']
-
     def next_contributor_id(self):
         self.dbcs['canonical'].execute("""
           select max(%s) as maxid from %s
@@ -66,9 +49,9 @@ class DB(object):
 
     def next_unlinked_contributions(self):
         self.dbcs['linker'].execute("""
-          select %s as id, %s as full_name, %s as city, %s as state, %s as zipcode, %s as employer, %s as occupation, %s as last_name, %s as canonical_id from %s where %s is null limit %s
+          select %s as id, %s as full_name, %s as city, %s as state, %s as zipcode, %s as employer, %s as occupation, %s as canonical_id from %s where %s is null limit %s
           """ %
-          (self.table_config['id'], self.table_config['full_name'], self.table_config['city'], self.table_config['state'], self.table_config['zipcode'], self.table_config['employer'], self.table_config['occupation'], self.table_config['last_name'], self.table_config['canonical_id'], self.tablename, self.table_config['canonical_id'], CHUNK_SIZE))
+          (self.table_config['id'], self.table_config['full_name'], self.table_config['city'], self.table_config['state'], self.table_config['zipcode'], self.table_config['employer'], self.table_config['occupation'], self.table_config['canonical_id'], self.tablename, self.table_config['canonical_id'], CHUNK_SIZE))
         return self.dbcs['linker'].fetchall()
 
     def potential_contributors(self, contribution):

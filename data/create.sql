@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `individual_possible_matches` (
   KEY `index_individual_possible_matches_on_resolved` (`resolved`)
 );
 
-CREATE TABLE IF NOT EXISTS `individual_contributions` (
+CREATE TABLE IF NOT EXISTS `individual_contributions_2014` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `committee_id` varchar(255) DEFAULT NULL,
   `amendment` varchar(255) DEFAULT NULL,
@@ -50,9 +50,7 @@ CREATE TABLE IF NOT EXISTS `individual_contributions` (
   `memo_code` varchar(255) DEFAULT NULL,
   `memo_text` varchar(255) DEFAULT NULL,
   `sub_id` int(11) DEFAULT NULL,
-  `contributor_last_name` varchar(255) DEFAULT NULL,
   `individual_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `index_individual_contributions_on_individual_id` (`individual_id`),
-  KEY `index_individual_contributions_on_contributor_last_name` (`contributor_last_name`)
+  KEY `index_individual_contributions_on_individual_id` (`individual_id`)
 );

@@ -6,13 +6,13 @@ databases:
     host: localhost
     linkable_tables:
       -
-        table: individual_contributions
+        table: individual_contributions_2014
         id: id
         canonical_id: individual_id
         full_name: contributor_name
         first_name:
         middle_name:
-        last_name: contributor_last_name
+        last_name:
         city: city
         state: state
         zipcode: zipcode

@@ -16,7 +16,7 @@ We suggest you follow these steps the first time you link a dataset. This guide 
 for running a linkage, then download, import, and link some FEC individual contribution data for the 2014 election cycle.
 After you've gone through the process once, it will be easier to link a different set of contributions.
 
-Create a database and three tables (individuals, individual_contributions, individual_possible_matches) for your linkage:
+Create a database and three tables (individuals, individual_contributions_2014, individual_possible_matches) for your linkage:
 
     mysqladmin -u root -p create fec_linker
     mysql -u root -p fec_linker < data/create.sql
@@ -30,7 +30,7 @@ Download and import the first 30,000 individual contributions from the 2014 cycl
     curl -s ftp://ftp.fec.gov/FEC/2014/indiv14.zip > data/indiv14.zip
     unzip data/indiv14.zip -d data
     head -30000 data/itcont.txt > data/itcont2.txt
-    mysql -u root fec_linker -e "LOAD DATA INFILE '`pwd`/data/itcont2.txt' INTO TABLE individual_contributions FIELDS TERMINATED BY '|' (committee_id,amendment,report_type,pgi,image_num,transaction_type,entity_type,contributor_name,city,state,zipcode,employer,occupation,transaction_date,amount,other_id,transaction_id,filing_number,memo_code,memo_text,sub_id,contributor_last_name,individual_id)"
+    mysql -u root fec_linker -e "LOAD DATA INFILE '`pwd`/data/itcont2.txt' INTO TABLE individual_contributions_2014 FIELDS TERMINATED BY '|' (committee_id,amendment,report_type,pgi,image_num,transaction_type,entity_type,contributor_name,city,state,zipcode,employer,occupation,transaction_date,amount,other_id,transaction_id,filing_number,memo_code,memo_text,sub_id)"
 
 Create the training set needed to run a linkage:
 
@@ -41,7 +41,7 @@ Link the 2014 individual contribution data:
     python link.py
 
 After the script finishes, the 30,000 contributions you imported are linked to canonical individuals. You'll see that the
-*individual_contributions* table has 30,000 records, while the *individuals* table has roughly 26,000. The difference in the
+*individual_contributions_2014* table has 30,000 records, while the *individuals* table has roughly 26,000. The difference in the
 sizes of those tables represent multiple contributions by a person. Each contribution record is linked to a canonical
 individual by the *canonical_id* field.
 
@@ -63,7 +63,7 @@ Linking a second dataset is easier than linking the first. The steps are:
 This second linkage shares the *individuals* table with the first linkage, so some individuals from the 2014 cycle may now be linked to
 the dataset you just imported.
 
-Note that rather than creating a new table, you could also just append new records to the same *individual_contributions* table you used
+Note that rather than creating a new table, you could also just append new records to the same *individual_contributions_2014* table you used
 for the example linkage and rerun the linkage, as long as you don't delete the existing data in the *canonical_id* field.
 
 ## Methodology

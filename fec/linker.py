@@ -16,9 +16,7 @@ class Linker(object):
 
     def link(self):
         print "Linking contributions in " + self.db.db['database'] + ":" + self.table
-        self.db.fill_empty_last_names()
         self.clf = self.trainer.train()
-
         max_contributor_id = self.db.next_contributor_id()
         ts_start = datetime.now()
         while True:
@@ -34,22 +32,23 @@ class Linker(object):
             new_possible_matches = []
             cnt = 0
             for uc in unlinked_contributions:
+                uc_features = self._contribution_features(uc)
 
                 # Don't process the same last_name|state twice in this round because the match could be in new_contributors and uncommitted
-                if self._name_key(uc) in used_name_keys:
+                if self._name_key(uc_features) in used_name_keys:
                     continue
-                used_name_keys[self._name_key(uc)] = True
+                used_name_keys[self._name_key(uc_features)] = True
                 cnt += 1
 
                 # Get potential contributors for this contribution
-                contributors = self.db.potential_contributors(uc)
+                contributors = self.db.potential_contributors(uc_features)
 
                 # Find match in contributors
-                contributor_id = self._first_matching_contributor_id(uc, contributors, new_possible_matches)
+                contributor_id = self._first_matching_contributor_id(uc_features, contributors, new_possible_matches)
 
                 # If no contributor was found, create a new one
                 if contributor_id == None:
-                    contributor = self._contribution_features(uc)
+                    contributor = uc_features
                     contributor['id'] = max_contributor_id
                     max_contributor_id += 1
                     new_contributors.append(contributor)
@@ -66,10 +65,10 @@ class Linker(object):
             ts_start = datetime.now()
 
     # Find the first matching contributor in a list
-    def _first_matching_contributor_id(self, contribution, contributors, new_possible_matches):
+    def _first_matching_contributor_id(self, contribution_features, contributors, new_possible_matches):
         possible_matches_to_add = []
         for c in contributors:
-            c1f, c2f = self._contribution_features(contribution), c
+            c1f, c2f = contribution_features, c
             compstring1 = '%s %s %s' % (c1f['first_name'], c1f['city'], c1f['state'])
             compstring2 = '%s %s %s' % (c2f['first_name'], c2f['city'], c2f['state'])
             if self.trainer.jaccard_sim(self.trainer.shingle(compstring1.lower(), 2), self.trainer.shingle(compstring2.lower(), 2)) < self.trainer.initial_sim:
@@ -79,7 +78,7 @@ class Linker(object):
             if edge[0][1] > CONFIDENCE_KEEP:
                 return c['id']
             elif edge[0][1] > CONFIDENCE_CHECK:
-                possible_matches_to_add.append({'object_id': contribution['id'], 'canonical_id': c['id'], 'confidence': edge[0][1]})
+                possible_matches_to_add.append({'object_id': contribution_features['id'], 'canonical_id': c['id'], 'confidence': edge[0][1]})
         new_possible_matches.extend(possible_matches_to_add)
         return None
 
@@ -91,6 +90,7 @@ class Linker(object):
             parsed_name = {'first': human_name.first, 'middle': human_name.middle, 'last': human_name.last}
             self.contribution_names[contribution['id']] = parsed_name
         return {
+            'id': contribution['id'],
             'full_name': contribution['full_name'].upper(),
             'first_name' : parsed_name['first'],
             'middle_name' : parsed_name['middle'],
@@ -102,5 +102,5 @@ class Linker(object):
             'occupation': contribution['occupation'].upper()
         }
 
-    def _name_key(self, contribution):
-        return contribution['last_name'].upper() + '|' + contribution['state'].upper()
+    def _name_key(self, contribution_features):
+        return contribution_features['last_name'].upper() + '|' + contribution_features['state'].upper()
