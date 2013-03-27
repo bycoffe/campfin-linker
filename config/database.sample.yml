@@ -2,7 +2,7 @@ databases:
   -
     database: fec_linker
     username: root
-    password: 
+    password: ''
     host: localhost
     linkable_tables:
       -
