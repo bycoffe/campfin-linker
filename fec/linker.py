@@ -10,11 +10,12 @@ class Linker(object):
 
     def __init__(self, dbname, table):
         self.db = DB(dbname, table)
+        self.table = table
         self.trainer = Trainer()
         self.contribution_names = {}
 
     def link(self):
-        print "Linking contributions in " + self.db.dbname + ":" + self.db.table
+        print "Linking contributions in " + self.db.db['database'] + ":" + self.table
         self.db.fill_empty_last_names()
         self.clf = self.trainer.train()
 

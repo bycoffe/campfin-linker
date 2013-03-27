@@ -1,4 +1,4 @@
-import simplejson as json
+import yaml
 import MySQLdb
 import MySQLdb.cursors
 
@@ -7,18 +7,35 @@ CHUNK_SIZE = 5000
 class DB(object):
 
     def __init__(self, dbname=None, table=None):
-        self.db_config = json.load(open('config/database.json'))
-        self.dbname = self.db_config['databases'].keys()[0] if dbname == None else dbname
-        self.table = self.db_config['databases'][self.dbname]['linkable_tables'].keys()[0] if table == None else table
+        self.db_config = yaml.load(open('config/database.yml'))
+        self.db = self.db_config['databases'][0] if dbname == None else self.get_db_config(dbname)
+        self.tablename = self.db['linkable_tables'][0]['table'] if table == None else table
+        self.table_config = [x for x in self.db['linkable_tables'] if x['table'] == self.tablename][0]
         self.canonical_config = self.db_config['canonical']
+        self.canonical = [x for x in self.db_config['databases'] if x['database'] == self.canonical_config['database']][0]
         self.possible_config = self.db_config['possibles']
-        self.table_config = self.db_config['databases'][self.dbname]['linkable_tables'][self.table]
-        self.dbs = {"canonical": MySQLdb.connect(**self.db_config['databases'][self.db_config['canonical']['database']]['connection']),
-                    "possibles": MySQLdb.connect(**self.db_config['databases'][self.db_config['possibles']['database']]['connection']),
-                    "linker": MySQLdb.connect(**self.db_config['databases'][self.dbname]['connection'])}
+        self.possible = [x for x in self.db_config['databases'] if x['database'] == self.possible_config['database']][0]
+        self.dbs = {
+            "linker": MySQLdb.connect(**self.db_config_for(self.db)),
+            "possibles": MySQLdb.connect(**self.db_config_for(self.possible)),
+            "canonical": MySQLdb.connect(**self.db_config_for(self.canonical))
+        }
         self.dbcs = {"canonical": self.dbs["canonical"].cursor(MySQLdb.cursors.DictCursor),
-                    "possibles": self.dbs["possibles"].cursor(MySQLdb.cursors.DictCursor),
-                    "linker": self.dbs["linker"].cursor(MySQLdb.cursors.DictCursor)}
+                     "possibles": self.dbs["possibles"].cursor(MySQLdb.cursors.DictCursor),
+                     "linker": self.dbs["linker"].cursor(MySQLdb.cursors.DictCursor)}
+
+    def get_db_config(self, dbname):
+        matches = [x for x in self.db_config if x['database'] == dbname]
+        if matches:
+            return matches[0]
+
+    def db_config_for(self, db):
+        return {
+            'host': db['host'],
+            'db': db['database'],
+            'user': db['username'],
+            'passwd': db['password']
+        }
 
     def fill_empty_last_names(self):
         print "Setting empty last names"
@@ -27,14 +44,14 @@ class DB(object):
             self.dbcs['linker'].execute("""
               update %s set %s = if(length(substring_index(%s, ',', 1)) = 0, 'EMPTY', substring_index(%s, ',', 1)) where %s is null or length(%s) = 0 limit 100000
               """ %
-              (self.table, self.table_config['last_name'], self.table_config['full_name'], self.table_config['full_name'], self.table_config['last_name'], self.table_config['last_name']))
+              (self.tablename, self.table_config['last_name'], self.table_config['full_name'], self.table_config['full_name'], self.table_config['last_name'], self.table_config['last_name']))
             self.dbs['linker'].commit()
 
     def num_unfilled_last_names(self):
         self.dbcs['linker'].execute("""
           select count(*) as cnt from %s where %s is null or length(%s) = 0
           """ %
-          (self.table, self.table_config['last_name'], self.table_config['last_name']))
+          (self.tablename, self.table_config['last_name'], self.table_config['last_name']))
         return self.dbcs['linker'].fetchone()['cnt']
 
     def next_contributor_id(self):
@@ -51,7 +68,7 @@ class DB(object):
         self.dbcs['linker'].execute("""
           select %s as id, %s as full_name, %s as city, %s as state, %s as zipcode, %s as employer, %s as occupation, %s as last_name, %s as canonical_id from %s where %s is null limit %s
           """ %
-          (self.table_config['id'], self.table_config['full_name'], self.table_config['city'], self.table_config['state'], self.table_config['zipcode'], self.table_config['employer'], self.table_config['occupation'], self.table_config['last_name'], self.table_config['canonical_id'], self.table, self.table_config['canonical_id'], CHUNK_SIZE))
+          (self.table_config['id'], self.table_config['full_name'], self.table_config['city'], self.table_config['state'], self.table_config['zipcode'], self.table_config['employer'], self.table_config['occupation'], self.table_config['last_name'], self.table_config['canonical_id'], self.tablename, self.table_config['canonical_id'], CHUNK_SIZE))
         return self.dbcs['linker'].fetchall()
 
     def potential_contributors(self, contribution):
@@ -77,7 +94,7 @@ class DB(object):
             self.dbcs['linker'].execute("""
               update %s set %s = %s where id = %s
               """ %
-              (self.table, self.table_config['canonical_id'], c['canonical_id'], c['id']))
+              (self.tablename, self.table_config['canonical_id'], c['canonical_id'], c['id']))
         self.dbs['linker'].commit()
 
     def create_new_possible_matches(self, new_possible_matches):
@@ -86,7 +103,7 @@ class DB(object):
             self.dbcs['possibles'].executemany(str_insert + """
               values (%s, %s, %s, %s)
               """,
-              ((m['canonical_id'], self.table, m['object_id'], m['confidence']) for m in new_possible_matches))
+              ((m['canonical_id'], self.tablename, m['object_id'], m['confidence']) for m in new_possible_matches))
             self.dbs['possibles'].commit()
 
     def r_get_next_possible_match(self):
@@ -100,15 +117,15 @@ class DB(object):
           order by %s.canonical_id
           limit 1
         """ %
-        (self.possible_config['table_name'], self.possible_config['table_name'], self.possible_config['table_name'], self.table, self.table_config['full_name'], self.canonical_config['table_name'], self.canonical_config['full_name'], self.table, self.table_config['city'], self.canonical_config['table_name'], self.canonical_config['city'], self.table, self.table_config['state'], self.canonical_config['table_name'], self.canonical_config['state'], self.table, self.table_config['zipcode'], self.canonical_config['table_name'], self.canonical_config['zipcode'], self.table, self.table_config['occupation'], self.canonical_config['table_name'], self.canonical_config['occupation'], self.table, self.table_config['employer'], self.canonical_config['table_name'], self.canonical_config['employer'],
-        self.possible_config['table_name'], self.table, self.canonical_config['table_name'], self.possible_config['table_name'], self.canonical_config['table_name'], self.canonical_config['id'], self.possible_config['table_name'], self.table, self.possible_config['table_name'], self.table, self.table_config['id'], self.possible_config['table_name']))
+        (self.possible_config['table_name'], self.possible_config['table_name'], self.possible_config['table_name'], self.tablename, self.table_config['full_name'], self.canonical_config['table_name'], self.canonical_config['full_name'], self.tablename, self.table_config['city'], self.canonical_config['table_name'], self.canonical_config['city'], self.tablename, self.table_config['state'], self.canonical_config['table_name'], self.canonical_config['state'], self.tablename, self.table_config['zipcode'], self.canonical_config['table_name'], self.canonical_config['zipcode'], self.tablename, self.table_config['occupation'], self.canonical_config['table_name'], self.canonical_config['occupation'], self.tablename, self.table_config['employer'], self.canonical_config['table_name'], self.canonical_config['employer'],
+        self.possible_config['table_name'], self.tablename, self.canonical_config['table_name'], self.possible_config['table_name'], self.canonical_config['table_name'], self.canonical_config['id'], self.possible_config['table_name'], self.tablename, self.possible_config['table_name'], self.tablename, self.table_config['id'], self.possible_config['table_name']))
         return self.dbcs['possibles'].fetchone()
 
     def r_ignore_match(self, match):
-        self.dbcs['possibles'].execute("update %s set resolved = true where object_table = '%s' and object_id = %s" % (self.possible_config['table_name'], self.table, match['object_id']))
+        self.dbcs['possibles'].execute("update %s set resolved = true where object_table = '%s' and object_id = %s" % (self.possible_config['table_name'], self.tablename, match['object_id']))
         self.dbs['possibles'].commit()
 
     def r_resolve_match(self, match):
-        self.dbcs['possibles'].execute("update %s set %s = %s where id = %s" % (self.table, self.table_config['canonical_id'], match['canonical_id'], match['object_id']))
-        self.dbcs['possibles'].execute("update %s set resolved = true where object_table = '%s' and object_id = %s" % (self.possible_config['table_name'], self.table, match['object_id']))
+        self.dbcs['possibles'].execute("update %s set %s = %s where id = %s" % (self.tablename, self.table_config['canonical_id'], match['canonical_id'], match['object_id']))
+        self.dbcs['possibles'].execute("update %s set resolved = true where object_table = '%s' and object_id = %s" % (self.possible_config['table_name'], self.tablename, match['object_id']))
         self.dbs['possibles'].commit()

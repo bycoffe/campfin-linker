@@ -1,4 +1,4 @@
-config/database.json
+config/database.yml
 *.pyc
 *.p
 *.csv
