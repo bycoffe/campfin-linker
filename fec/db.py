@@ -24,6 +24,11 @@ class DB(object):
                      "possibles": self.dbs["possibles"].cursor(MySQLdb.cursors.DictCursor),
                      "linker": self.dbs["linker"].cursor(MySQLdb.cursors.DictCursor)}
 
+    def execute(self, db, query, commit=True):
+        self.dbcs[db].execute(query);
+        if commit:
+            self.dbs[db].commit()
+
     def get_db_config(self, dbname):
         matches = [x for x in self.db_config if x['database'] == dbname]
         if matches:

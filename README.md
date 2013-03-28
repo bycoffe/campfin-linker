@@ -16,14 +16,13 @@ We suggest you follow these steps the first time you link a dataset. This guide 
 for running a linkage, then download, import, and link some FEC individual contribution data for the 2014 election cycle.
 After you've gone through the process once, it will be easier to link a different set of contributions.
 
-Create a database and three tables (individuals, individual_contributions_2014, individual_possible_matches) for your linkage:
+Create a local database.yml and edit the connection properties to match your system:
 
-    mysqladmin -u root -p create fec_linker
-    mysql -u root -p fec_linker < data/create.sql
+    cp config/database.sample.yml config/database.yml
 
-Create a local database.json and edit the fec connection properties to match your system:
+Create three tables (individuals, individual_contributions_2014, individual_possible_matches) for your linkage:
 
-    cp config/database.sample.json config/database.json
+    python create.py
 
 Download and import the first 30,000 individual contributions from the 2014 cycle:
 
