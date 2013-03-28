@@ -11,7 +11,7 @@ class Trainer(object):
 
     def __init__(self):
         self.initial_sim = 0.1
-        self.last_name_groups = defaultdict(list)
+        self.groups = defaultdict(list)
         self.training_set_size = 1000000
         self.input_file = "data/crp_slice.csv"
         self.output_file = 'data/training_matches.p'
@@ -20,15 +20,16 @@ class Trainer(object):
     def generate_training_set(self, training_set_size=None):
         if training_set_size != None:
             self.training_set_size = training_set_size
-        self.group_by_last_name()
+        self.group_by_last_name_and_state()
         to_create = []
-        for last_name, matches in self.last_name_groups.iteritems():
+        for last_name_and_state, matches in self.groups.iteritems():
+            last_name, state = last_name_and_state.split('|')
             if len(matches) < 2 or last_name.count(' ') > 0:
                 continue
             print last_name
             for c in itertools.combinations(matches, 2):
-                compstring1 = '%s %s %s' % (c[0]['first_name'], c[0]['city'], c[0]['state'])
-                compstring2 = '%s %s %s' % (c[1]['first_name'], c[1]['city'], c[1]['state'])
+                compstring1 = '%s %s' % (c[0]['first_name'], c[0]['city'])
+                compstring2 = '%s %s' % (c[1]['first_name'], c[1]['city'])
                 if self.jaccard_sim(self.shingle(compstring1.lower(), 2), self.shingle(compstring2.lower(), 2)) >= self.initial_sim:
                     c1, c2 = c[0], c[1]
                     featurevector = str(self.create_featurevector(c1, c2))
@@ -71,7 +72,7 @@ class Trainer(object):
         '''
         return set([word[i:i + n] for i in range(len(word) - n + 1)])
 
-    def group_by_last_name(self):
+    def group_by_last_name_and_state(self):
         n=0
         for row in csv.reader(open(self.input_file), delimiter=',', quotechar='"'):
             n += 1
@@ -85,7 +86,7 @@ class Trainer(object):
             row['first_name'] = parsed_name.first
             row['last_name'] = parsed_name.last
             if len(row['last_name']) > 0:
-                self.last_name_groups[row['last_name']].append(row)
+                self.groups[row['last_name'] + '|' + row['state']].append(row)
             if n >= self.training_set_size:
                 break
 

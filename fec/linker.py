@@ -69,8 +69,8 @@ class Linker(object):
         possible_matches_to_add = []
         for c in contributors:
             c1f, c2f = contribution_features, c
-            compstring1 = '%s %s %s' % (c1f['first_name'], c1f['city'], c1f['state'])
-            compstring2 = '%s %s %s' % (c2f['first_name'], c2f['city'], c2f['state'])
+            compstring1 = '%s %s' % (c1f['first_name'], c1f['city'])
+            compstring2 = '%s %s' % (c2f['first_name'], c2f['city'])
             if self.trainer.jaccard_sim(self.trainer.shingle(compstring1.lower(), 2), self.trainer.shingle(compstring2.lower(), 2)) < self.trainer.initial_sim:
                 continue
             featurevector = str(self.trainer.create_featurevector(c1f, c2f))
