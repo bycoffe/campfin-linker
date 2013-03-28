@@ -17,54 +17,57 @@ clf = RandomForestClassifier(n_estimators=10, random_state=0)
 clf = clf.fit([eval(t.features) for t in training_matches], [int(t.matchpct) for t in training_matches])
 
 trainer = Trainer()
-trainer.group_by_last_name()
+trainer.group_by_last_name_and_state()
 
-CONFIDENCE_KEEP = 0.89
+CONFIDENCE_KEEP = 0.65
 CONFIDENCE_CHECK = 0.51
 
 num_pairs = 0
+num_true_matches = 0
+num_found_matches = 0
 num_correct = 0
 num_to_check = 0
 num_false_positives = 0
 num_missed = 0
-num_missed_for_state = 0
 
-for last_name, matches in trainer.last_name_groups.iteritems():
+print 'Running test with KEEP=' + str(CONFIDENCE_KEEP) + ', initial_sim=' + str(trainer.initial_sim)
+for last_name_and_state, matches in trainer.groups.iteritems():
+    last_name, state = last_name_and_state.split('|')
     if len(matches) < 2:
         continue
-    print last_name
+    #print last_name
     for c in itertools.combinations(matches, 2):
         is_true_match = c[0]['contributor_ext_id'] == c[1]['contributor_ext_id']
-        if c[0]['state'] == c[1]['state']:
-            compstring1 = '%s %s %s' % (c[0]['first_name'], c[0]['city'], c[0]['state'])
-            compstring2 = '%s %s %s' % (c[1]['first_name'], c[1]['city'], c[1]['state'])
-            if trainer.jaccard_sim(trainer.shingle(compstring1.lower(), 2), trainer.shingle(compstring2.lower(), 2)) >= trainer.initial_sim:
-                num_pairs += 1
-                c1, c2 = c[0], c[1]
-                featurevector = str(trainer.create_featurevector(c1, c2))
-                edge = clf.predict_proba(eval(featurevector))
-                if edge[0][1] > CONFIDENCE_KEEP and is_true_match == True:
-                    num_correct += 1
-                elif edge[0][1] > CONFIDENCE_KEEP:
-                    num_false_positives += 1
-                elif edge[0][1] > CONFIDENCE_CHECK:
-                    num_to_check += 1
-                elif is_true_match == True:
-                    num_missed += 1
-                else:
-                    num_correct += 1
-        elif is_true_match:
-            print '***'
-            print c[0]
-            print c[1]
-            num_missed_for_state += 1
+        if is_true_match:
+            num_true_matches += 1
+        compstring1 = '%s %s' % (c[0]['first_name'], c[0]['city'])
+        compstring2 = '%s %s' % (c[1]['first_name'], c[1]['city'])
+        if trainer.jaccard_sim(trainer.shingle(compstring1.lower(), 2), trainer.shingle(compstring2.lower(), 2)) >= trainer.initial_sim:
+            num_pairs += 1
+            c1, c2 = c[0], c[1]
+            featurevector = str(trainer.create_featurevector(c1, c2))
+            edge = clf.predict_proba(eval(featurevector))
+            if edge[0][1] > CONFIDENCE_KEEP and is_true_match == True:
+                num_correct += 1
+                num_found_matches += 1
+            elif edge[0][1] > CONFIDENCE_KEEP:
+                #print c1
+                #print c2
+                num_false_positives += 1
+            elif edge[0][1] > CONFIDENCE_CHECK:
+                num_to_check += 1
+            elif is_true_match == True:
+                num_missed += 1
+            else:
+                num_correct += 1
 
 print '**'
-print 'pairs: ' + str(num_pairs)
-print 'correct: ' + str(num_correct)
-print 'to check: ' + str(num_to_check)
+print 'true matches: ' + str(num_true_matches)
+print 'found matches: ' + str(num_found_matches)
+print 'matches to check: ' + str(num_to_check)
+print 'missed matches: ' + str(num_missed)
 print 'false positives: ' + str(num_false_positives)
-print 'missed: ' + str(num_missed)
-print 'missed (state): ' + str(num_missed_for_state)
+print 'pairs: ' + str(num_pairs)
+print 'correct pairs: ' + str(num_correct)
 print '*'
-print str(float(num_correct)/float(num_pairs)*100.0)
+print str(float(num_found_matches)/float(num_true_matches)*100.0)

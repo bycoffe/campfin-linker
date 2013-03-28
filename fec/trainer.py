@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestClassifier
 class Trainer(object):
 
     def __init__(self):
-        self.initial_sim = 0.1
+        self.initial_sim = 0.05
         self.groups = defaultdict(list)
         self.training_set_size = 1000000
         self.input_file = "data/crp_slice.csv"
@@ -26,7 +26,7 @@ class Trainer(object):
             last_name, state = last_name_and_state.split('|')
             if len(matches) < 2 or last_name.count(' ') > 0:
                 continue
-            print last_name
+            #print last_name
             for c in itertools.combinations(matches, 2):
                 compstring1 = '%s %s' % (c[0]['first_name'], c[0]['city'])
                 compstring2 = '%s %s' % (c[1]['first_name'], c[1]['city'])

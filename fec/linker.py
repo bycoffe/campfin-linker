@@ -3,7 +3,7 @@ from sklearn.ensemble import RandomForestClassifier
 from fec.db import *
 from fec.trainer import *
 
-CONFIDENCE_KEEP = 0.89
+CONFIDENCE_KEEP = 0.65
 CONFIDENCE_CHECK = 0.51
 
 class Linker(object):
