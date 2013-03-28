@@ -24,8 +24,8 @@ class DB(object):
                      "possibles": self.dbs["possibles"].cursor(MySQLdb.cursors.DictCursor),
                      "linker": self.dbs["linker"].cursor(MySQLdb.cursors.DictCursor)}
 
-    def execute(self, db, query, commit=True):
-        self.dbcs[db].execute(query);
+    def execute(self, db, query, args=[], commit=True):
+        self.dbcs[db].execute(query, args);
         if commit:
             self.dbs[db].commit()
 
