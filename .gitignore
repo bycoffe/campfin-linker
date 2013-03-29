@@ -5,3 +5,4 @@ config/database.yml
 data/indiv*.zip
 data/tmp
 itcont*.txt
+prof

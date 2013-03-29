@@ -29,27 +29,22 @@ class Linker(object):
 
             self.contribution_names = {}
             new_contributors = []
+            new_contributors_by_namekey = {}
             used_name_keys = {}
             new_possible_matches = []
-            cnt = 0
             for uc in unlinked_contributions:
                 uc_features = self._contribution_features(uc)
-
-                # Don't process the same last_name|state twice in this round because the match could be in new_contributors and uncommitted
-                if self._name_key(uc_features) in used_name_keys:
-                    continue
-                used_name_keys[self._name_key(uc_features)] = True
-                cnt += 1
 
                 # Get potential contributors for this contribution
                 if self._name_key(uc_features) in all_contributors:
                     contributors = all_contributors[self._name_key(uc_features)]
                 else:
-                    contributors = self.db.potential_contributors(uc_features)
-                    all_contributors[self._name_key(uc_features)] = list(contributors)
+                    contributors = list(self.db.potential_contributors(uc_features))
+                    all_contributors[self._name_key(uc_features)] = contributors
 
                 # Find match in contributors
-                contributor_id = self._first_matching_contributor_id(uc_features, contributors, new_possible_matches)
+                new_contributors_for_key = new_contributors_by_namekey[self._name_key(uc_features)] if self._name_key(uc_features) in new_contributors_by_namekey else []
+                contributor_id = self._first_matching_contributor_id(uc_features, contributors + new_contributors_for_key, new_possible_matches)
 
                 # If no contributor was found, create a new one
                 if contributor_id == None:
@@ -57,6 +52,9 @@ class Linker(object):
                     contributor['id'] = max_contributor_id
                     max_contributor_id += 1
                     new_contributors.append(contributor)
+                    if not self._name_key(uc_features) in new_contributors_by_namekey:
+                        new_contributors_by_namekey[self._name_key(uc_features)] = []
+                    new_contributors_by_namekey[self._name_key(uc_features)].append(contributor)
                     all_contributors[self._name_key(uc_features)].append(contributor)
                     contributor_id = contributor['id']
 
@@ -67,8 +65,7 @@ class Linker(object):
             self.db.save_contributions(unlinked_contributions)
             self.db.create_new_possible_matches(new_possible_matches)
 
-            print "Processed " + str(cnt) + " contributions in " + str(datetime.now() - ts_start)
-
+            print "Processed " + str(len(unlinked_contributions)) + " contributions in " + str(datetime.now() - ts_start)
 
     # Find the first matching contributor in a list
     def _first_matching_contributor_id(self, contribution_features, contributors, new_possible_matches):

@@ -14,6 +14,6 @@ Linker(options.dbname, options.table).link()
 
 #import cProfile
 #import pstats
-#cProfile.run('Linker().link()', 'prof')
+#cProfile.run('Linker(options.dbname, options.table).link()', 'prof')
 #p = pstats.Stats('prof')
 #p.sort_stats('cumulative').print_stats(50)
