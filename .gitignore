@@ -2,6 +2,6 @@ config/database.yml
 *.pyc
 *.p
 *.csv
-data/indiv14.zip
+data/indiv*.zip
 data/tmp
 itcont*.txt

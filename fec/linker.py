@@ -18,8 +18,9 @@ class Linker(object):
         print "Linking contributions in " + self.db.db['database'] + ":" + self.table
         self.clf = self.trainer.train()
         max_contributor_id = self.db.next_contributor_id()
-        ts_start = datetime.now()
+        all_contributors = {}
         while True:
+            ts_start = datetime.now()
 
             # Get the next batch of contributions to process
             unlinked_contributions = self.db.next_unlinked_contributions()
@@ -41,7 +42,11 @@ class Linker(object):
                 cnt += 1
 
                 # Get potential contributors for this contribution
-                contributors = self.db.potential_contributors(uc_features)
+                if self._name_key(uc_features) in all_contributors:
+                    contributors = all_contributors[self._name_key(uc_features)]
+                else:
+                    contributors = self.db.potential_contributors(uc_features)
+                    all_contributors[self._name_key(uc_features)] = list(contributors)
 
                 # Find match in contributors
                 contributor_id = self._first_matching_contributor_id(uc_features, contributors, new_possible_matches)
@@ -52,6 +57,7 @@ class Linker(object):
                     contributor['id'] = max_contributor_id
                     max_contributor_id += 1
                     new_contributors.append(contributor)
+                    all_contributors[self._name_key(uc_features)].append(contributor)
                     contributor_id = contributor['id']
 
                 # Link the contribution
@@ -62,7 +68,7 @@ class Linker(object):
             self.db.create_new_possible_matches(new_possible_matches)
 
             print "Processed " + str(cnt) + " contributions in " + str(datetime.now() - ts_start)
-            ts_start = datetime.now()
+
 
     # Find the first matching contributor in a list
     def _first_matching_contributor_id(self, contribution_features, contributors, new_possible_matches):
