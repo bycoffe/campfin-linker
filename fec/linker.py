@@ -5,6 +5,7 @@ from fec.trainer import *
 
 CONFIDENCE_KEEP = 0.65
 CONFIDENCE_CHECK = 0.51
+MAX_CONTRIBUTOR_CACHE_SIZE = 2000000
 
 class Linker(object):
 
@@ -18,7 +19,8 @@ class Linker(object):
         print "Linking contributions in " + self.db.db['database'] + ":" + self.table
         self.clf = self.trainer.train()
         max_contributor_id = self.db.next_contributor_id()
-        all_contributors = {}
+        contributor_cache = {}
+        contributor_cache_size = 0
         while True:
             ts_start = datetime.now()
 
@@ -37,11 +39,15 @@ class Linker(object):
                 name_key = self._name_key(uc_features)
 
                 # Get potential contributors for this contribution
-                if name_key in all_contributors:
-                    contributors = all_contributors[name_key]
+                while contributor_cache_size > MAX_CONTRIBUTOR_CACHE_SIZE:
+                    k, v = contributor_cache.popitem()
+                    contributor_cache_size -= len(v)
+                if name_key in contributor_cache:
+                    contributors = contributor_cache[name_key]
                 else:
                     contributors = list(self.db.potential_contributors(uc_features))
-                    all_contributors[name_key] = contributors
+                    contributor_cache[name_key] = contributors
+                    contributor_cache_size += len(contributors)
 
                 # Find match in contributors
                 new_contributors_for_key = new_contributors_by_namekey[name_key] if name_key in new_contributors_by_namekey else []
@@ -56,7 +62,8 @@ class Linker(object):
                     if not name_key in new_contributors_by_namekey:
                         new_contributors_by_namekey[name_key] = []
                     new_contributors_by_namekey[name_key].append(contributor)
-                    all_contributors[name_key].append(contributor)
+                    contributor_cache[name_key].append(contributor)
+                    contributor_cache_size += 1
                     contributor_id = contributor['id']
 
                 # Link the contribution
@@ -65,7 +72,6 @@ class Linker(object):
             self.db.create_contributors(new_contributors)
             self.db.save_contributions(unlinked_contributions)
             self.db.create_new_possible_matches(new_possible_matches)
-
             print "Processed " + str(len(unlinked_contributions)) + " contributions in " + str(datetime.now() - ts_start)
 
     # Find the first matching contributor in a list
