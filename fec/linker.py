@@ -34,16 +34,17 @@ class Linker(object):
             new_possible_matches = []
             for uc in unlinked_contributions:
                 uc_features = self._contribution_features(uc)
+                name_key = self._name_key(uc_features)
 
                 # Get potential contributors for this contribution
-                if self._name_key(uc_features) in all_contributors:
-                    contributors = all_contributors[self._name_key(uc_features)]
+                if name_key in all_contributors:
+                    contributors = all_contributors[name_key]
                 else:
                     contributors = list(self.db.potential_contributors(uc_features))
-                    all_contributors[self._name_key(uc_features)] = contributors
+                    all_contributors[name_key] = contributors
 
                 # Find match in contributors
-                new_contributors_for_key = new_contributors_by_namekey[self._name_key(uc_features)] if self._name_key(uc_features) in new_contributors_by_namekey else []
+                new_contributors_for_key = new_contributors_by_namekey[name_key] if name_key in new_contributors_by_namekey else []
                 contributor_id = self._first_matching_contributor_id(uc_features, contributors + new_contributors_for_key, new_possible_matches)
 
                 # If no contributor was found, create a new one
@@ -52,10 +53,10 @@ class Linker(object):
                     contributor['id'] = max_contributor_id
                     max_contributor_id += 1
                     new_contributors.append(contributor)
-                    if not self._name_key(uc_features) in new_contributors_by_namekey:
-                        new_contributors_by_namekey[self._name_key(uc_features)] = []
-                    new_contributors_by_namekey[self._name_key(uc_features)].append(contributor)
-                    all_contributors[self._name_key(uc_features)].append(contributor)
+                    if not name_key in new_contributors_by_namekey:
+                        new_contributors_by_namekey[name_key] = []
+                    new_contributors_by_namekey[name_key].append(contributor)
+                    all_contributors[name_key].append(contributor)
                     contributor_id = contributor['id']
 
                 # Link the contribution
