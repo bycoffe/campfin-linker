@@ -75,8 +75,10 @@ class Trainer(object):
     def group_by_last_name_and_state(self):
         n=0
         for row in csv.reader(open(self.input_file), delimiter=',', quotechar='"'):
-            n += 1
             row = dict(zip(self.input_file_fields, row))
+            if row['contributor_gender'] == '':
+                continue
+            n += 1
             row['full_name'] = row['full_name'].upper()
             row['city'] = row['city'].upper()
             row['state'] = row['state'].upper()
