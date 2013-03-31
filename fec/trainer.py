@@ -82,6 +82,7 @@ class Trainer(object):
             row['full_name'] = row['full_name'].upper()
             row['city'] = row['city'].upper()
             row['state'] = row['state'].upper()
+            row['zipcode'] = row['zipcode'].zfill(5)
             row['occupation'] = row['occupation'].upper()
             row['employer'] = row['employer'].upper()
             parsed_name = HumanName(row['full_name'])

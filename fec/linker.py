@@ -107,7 +107,7 @@ class Linker(object):
             'last_name' : parsed_name['last'],
             'city': contribution['city'].upper(),
             'state': contribution['state'].upper(),
-            'zipcode': contribution['zipcode'],
+            'zipcode': contribution['zipcode'].zfill(5),
             'employer': contribution['employer'].upper(),
             'occupation': contribution['occupation'].upper()
         }
