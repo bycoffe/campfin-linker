@@ -5,7 +5,7 @@ from fec.trainer import *
 
 CONFIDENCE_KEEP = 0.65
 CONFIDENCE_CHECK = 0.51
-MAX_CONTRIBUTOR_CACHE_SIZE = 2000000
+MAX_CONTRIBUTOR_CACHE_SIZE = 1000000 # Each item about 1kB
 
 class Linker(object):
 
