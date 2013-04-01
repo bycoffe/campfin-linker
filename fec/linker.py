@@ -96,7 +96,7 @@ class Linker(object):
         if contribution['id'] in self.contribution_names:
             parsed_name = self.contribution_names[contribution['id']]
         else:
-            human_name = HumanName(contribution['full_name'].upper())
+            human_name = HumanName(unicode(contribution['full_name'].upper(), errors='ignore'))
             parsed_name = {'first': human_name.first, 'middle': human_name.middle, 'last': human_name.last}
             self.contribution_names[contribution['id']] = parsed_name
         return {
