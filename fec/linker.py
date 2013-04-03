@@ -75,7 +75,7 @@ class Linker(object):
                     contributor_id = contributor['id']
 
                 # Link the contribution
-                uc['canonical_id'] = contributor_id
+                uc['individual_id'] = contributor_id
 
             self.db.create_contributors(new_contributors)
             self.db.save_contributions(unlinked_contributions)
@@ -96,7 +96,7 @@ class Linker(object):
             if edge[0][1] > CONFIDENCE_KEEP:
                 return c['id']
             elif edge[0][1] > CONFIDENCE_CHECK:
-                possible_matches_to_add.append({'object_id': contribution_features['id'], 'canonical_id': c['id'], 'confidence': edge[0][1]})
+                possible_matches_to_add.append({'object_id': contribution_features['id'], 'individual_id': c['id'], 'confidence': edge[0][1]})
         new_possible_matches.extend(possible_matches_to_add)
         return None
 

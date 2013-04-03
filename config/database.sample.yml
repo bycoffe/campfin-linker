@@ -8,7 +8,7 @@ databases:
       -
         table: individual_contributions_2014
         id: id
-        canonical_id: individual_id
+        individual_id: individual_id
         full_name: contributor_name
         first_name:
         middle_name:
@@ -19,7 +19,7 @@ databases:
         employer: employer
         occupation: occupation
 
-canonical:
+individuals:
   database: fec_linker
   table_name: individuals
   id: id
