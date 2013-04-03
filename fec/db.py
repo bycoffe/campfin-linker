@@ -24,7 +24,12 @@ class DB(object):
     def set_table(self, dbname=None, table=None):
         self.db = self.db_config['databases'][0] if dbname == None else self.get_db_config(dbname)
         self.tablename = self.db['linkable_tables'][0]['table'] if table == None else table
-        self.table_config = [x for x in self.db['linkable_tables'] if x['table'] == self.tablename][0]
+        self.table_config = [x for x in self.db['linkable_tables'] if x['table'] == self.tablename]
+        if len(self.table_config) == 0:
+            print "Table %s not found in database.yml" % self.tablename
+            exit()
+        else:
+            self.table_config = self.table_config[0]
         self.dbs["linker"] = MySQLdb.connect(**self.db_config_for(self.db))
         self.dbcs["linker"] = self.dbs["linker"].cursor(MySQLdb.cursors.DictCursor)
 
