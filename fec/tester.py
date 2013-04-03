@@ -4,19 +4,22 @@ from sklearn.ensemble import RandomForestClassifier
 
 class Tester(object):
 
+    def __init__(self):
+        self.test_training_file = 'data/training_matches_test.p'
+
     # Used to adjust learning parameters/thresholds
     def run_training_test(self):
-        trainer = Trainer()
+        trainer = Trainer(self.test_training_file)
         trainer.generate_training_set(10000)
 
-        match_file = open('data/training_matches.p', 'rb')
+        match_file = open(self.test_training_file, 'rb')
         training_matches = pickle.load(match_file)
         match_file.close()
 
         clf = RandomForestClassifier(n_estimators=10, random_state=0)
         clf = clf.fit([eval(t.features) for t in training_matches], [int(t.matchpct) for t in training_matches])
 
-        trainer = Trainer()
+        trainer = Trainer(self.test_training_file)
         trainer.group_by_last_name_and_state()
 
         CONFIDENCE_KEEP = 0.65
@@ -75,17 +78,17 @@ class Tester(object):
 
     # Illustrates difference between bucketing by last_name and bucketing by last_name/state (1%)
     def run_bucket_test(self):
-        trainer = Trainer()
+        trainer = Trainer(self.test_training_file)
         trainer.generate_training_set(10000)
 
-        match_file = open('data/training_matches.p', 'rb')
+        match_file = open(self.test_training_file, 'rb')
         training_matches = pickle.load(match_file)
         match_file.close()
 
         clf = RandomForestClassifier(n_estimators=10, random_state=0)
         clf = clf.fit([eval(t.features) for t in training_matches], [int(t.matchpct) for t in training_matches])
 
-        trainer = Trainer()
+        trainer = Trainer(self.test_training_file)
 
         num_matches = 0
         num_lastname_matches = 0
