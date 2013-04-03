@@ -101,18 +101,19 @@ class Linker(object):
         return None
 
     def _contribution_features(self, contribution):
-        if contribution['id'] in self.contribution_names:
-            parsed_name = self.contribution_names[contribution['id']]
-        else:
-            human_name = HumanName(unicode(contribution['full_name'].upper(), errors='ignore'))
-            parsed_name = {'first': human_name.first, 'middle': human_name.middle, 'last': human_name.last}
-            self.contribution_names[contribution['id']] = parsed_name
+        if len(contribution['full_name']) > 0:
+            if contribution['id'] in self.contribution_names:
+                parsed_name = self.contribution_names[contribution['id']]
+            else:
+                human_name = HumanName(unicode(contribution['full_name'].upper(), errors='ignore'))
+                parsed_name = {'first': human_name.first, 'middle': human_name.middle, 'last': human_name.last}
+                self.contribution_names[contribution['id']] = parsed_name
         return {
             'id': contribution['id'],
             'full_name': contribution['full_name'].upper(),
-            'first_name' : parsed_name['first'],
-            'middle_name' : parsed_name['middle'],
-            'last_name' : parsed_name['last'],
+            'first_name' : (contribution['first_name'].upper() if len(contribution['first_name']) > 0 else parsed_name['first']),
+            'middle_name' : (contribution['middle_name'].upper() if len(contribution['middle_name']) > 0 else parsed_name['middle']),
+            'last_name' : (contribution['last_name'].upper() if len(contribution['last_name']) > 0 else parsed_name['last']),
             'city': contribution['city'].upper(),
             'state': contribution['state'].upper(),
             'zipcode': contribution['zipcode'].zfill(5),
