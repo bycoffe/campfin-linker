@@ -9,12 +9,12 @@ class DB(object):
     def __init__(self):
         self.db_config = yaml.load(open('config/database.yml'))
         self.individuals_config = self.db_config['individuals']
-        self.individuals = [x for x in self.db_config['databases'] if x['database'] == self.individuals_config['database']][0]
+        self.individuals_db_config = self.get_db_config(self.individuals_config['database']) or self.db_config['databases'][0]
         self.partial_matches_config = self.db_config['partial_matches']
-        self.partial_matches = [x for x in self.db_config['databases'] if x['database'] == self.partial_matches_config['database']][0]
+        self.partial_matches_db_config = self.get_db_config(self.partial_matches_config['database']) or self.db_config['databases'][0]
         self.dbs = {
-            "partial_matches": MySQLdb.connect(**self.db_config_for(self.partial_matches)),
-            "individuals": MySQLdb.connect(**self.db_config_for(self.individuals))
+            "individuals": MySQLdb.connect(**self.db_config_for(self.individuals_db_config)),
+            "partial_matches": MySQLdb.connect(**self.db_config_for(self.partial_matches_db_config))
         }
         self.dbcs = {"individuals": self.dbs["individuals"].cursor(MySQLdb.cursors.DictCursor),
                      "partial_matches": self.dbs["partial_matches"].cursor(MySQLdb.cursors.DictCursor),
