@@ -9,15 +9,23 @@ MAX_CONTRIBUTOR_CACHE_SIZE = 1000000 # Each item about 1kB
 
 class Linker(object):
 
-    def __init__(self, dbname, table):
-        self.db = DB(dbname, table)
-        self.table = self.db.tablename
+    def __init__(self):
+        self.db = DB()
         self.trainer = Trainer()
+        self.clf = self.trainer.train()
         self.contribution_names = {}
 
-    def link(self):
+    def link(self, dbname=None, table=None):
+        self.link_all() if table == None else self.link_one(dbname, table)
+
+    def link_all(self):
+        for dbname, table in self.db.all_linkable_tables():
+            self.link_one(dbname, table)
+
+    def link_one(self, dbname, table):
+        self.db.set_table(dbname, table)
+        self.table = table
         print "Linking contributions in " + self.db.db['database'] + ":" + self.table
-        self.clf = self.trainer.train()
         max_contributor_id = self.db.next_contributor_id()
         contributor_cache = {}
         contributor_cache_size = 0

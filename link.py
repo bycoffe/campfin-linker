@@ -10,10 +10,10 @@ parser.add_option("-t", "--table",
                   help="Name of table to link")
 (options, args) = parser.parse_args()
 
-Linker(options.dbname, options.table).link()
+Linker().link(options.dbname, options.table)
 
 #import cProfile
 #import pstats
-#cProfile.run('Linker(options.dbname, options.table).link()', 'prof')
+#cProfile.run('Linker().link(options.dbname, options.table)', 'prof')
 #p = pstats.Stats('prof')
 #p.sort_stats('cumulative').print_stats(50)

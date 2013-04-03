@@ -6,23 +6,34 @@ CHUNK_SIZE = 5000
 
 class DB(object):
 
-    def __init__(self, dbname=None, table=None):
+    def __init__(self):
         self.db_config = yaml.load(open('config/database.yml'))
-        self.db = self.db_config['databases'][0] if dbname == None else self.get_db_config(dbname)
-        self.tablename = self.db['linkable_tables'][0]['table'] if table == None else table
-        self.table_config = [x for x in self.db['linkable_tables'] if x['table'] == self.tablename][0]
         self.canonical_config = self.db_config['canonical']
         self.canonical = [x for x in self.db_config['databases'] if x['database'] == self.canonical_config['database']][0]
         self.possible_config = self.db_config['possibles']
         self.possible = [x for x in self.db_config['databases'] if x['database'] == self.possible_config['database']][0]
         self.dbs = {
-            "linker": MySQLdb.connect(**self.db_config_for(self.db)),
             "possibles": MySQLdb.connect(**self.db_config_for(self.possible)),
             "canonical": MySQLdb.connect(**self.db_config_for(self.canonical))
         }
         self.dbcs = {"canonical": self.dbs["canonical"].cursor(MySQLdb.cursors.DictCursor),
                      "possibles": self.dbs["possibles"].cursor(MySQLdb.cursors.DictCursor),
-                     "linker": self.dbs["linker"].cursor(MySQLdb.cursors.DictCursor)}
+        }
+        self.set_table()
+
+    def set_table(self, dbname=None, table=None):
+        self.db = self.db_config['databases'][0] if dbname == None else self.get_db_config(dbname)
+        self.tablename = self.db['linkable_tables'][0]['table'] if table == None else table
+        self.table_config = [x for x in self.db['linkable_tables'] if x['table'] == self.tablename][0]
+        self.dbs["linker"] = MySQLdb.connect(**self.db_config_for(self.db))
+        self.dbcs["linker"] = self.dbs["linker"].cursor(MySQLdb.cursors.DictCursor)
+
+    def all_linkable_tables(self):
+        tables = []
+        for db in self.db_config['databases']:
+            for table in db['linkable_tables']:
+                tables.append([db['database'], table['table']])
+        return tables
 
     def execute(self, db, query, args=[], commit=True):
         self.dbcs[db].execute(query, args);
@@ -30,7 +41,7 @@ class DB(object):
             self.dbs[db].commit()
 
     def get_db_config(self, dbname):
-        matches = [x for x in self.db_config if x['database'] == dbname]
+        matches = [x for x in self.db_config['databases'] if x['database'] == dbname]
         if matches:
             return matches[0]
 

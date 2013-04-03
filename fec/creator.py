@@ -6,7 +6,7 @@ class Creator(object):
         self.db = DB()
 
     def create(self):
-        self.db.execute("linker", """
+        self.db.execute("canonical", """
             CREATE TABLE IF NOT EXISTS `individuals` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `full_name` varchar(255) DEFAULT NULL,
@@ -23,7 +23,7 @@ class Creator(object):
             )
         """)
 
-        self.db.execute("linker", """
+        self.db.execute("possibles", """
             CREATE TABLE IF NOT EXISTS `individual_possible_matches` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `canonical_id` int(11) DEFAULT NULL,

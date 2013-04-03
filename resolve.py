@@ -10,7 +10,8 @@ parser.add_option("-t", "--table",
                   help="Name of table to resolve")
 (options, args) = parser.parse_args()
 
-db = DB(options.dbname, options.table)
+db = DB()
+db.set_table(options.dbname, options.table)
 
 while True:
 
