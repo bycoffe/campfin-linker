@@ -33,6 +33,6 @@ individuals:
   employer: employer
   occupation: occupation
 
-possibles:
+partial_matches:
   database: fec_linker
-  table_name: individual_possible_matches
+  table_name: individual_partial_matches

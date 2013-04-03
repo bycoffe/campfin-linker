@@ -23,8 +23,8 @@ class Creator(object):
             )
         """)
 
-        self.db.execute("possibles", """
-            CREATE TABLE IF NOT EXISTS `individual_possible_matches` (
+        self.db.execute("partial_matches", """
+            CREATE TABLE IF NOT EXISTS `individual_partial_matches` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `individual_id` int(11) DEFAULT NULL,
               `object_table` varchar(255) DEFAULT NULL,
@@ -32,10 +32,10 @@ class Creator(object):
               `confidence` float DEFAULT NULL,
               `resolved` tinyint(1) DEFAULT '0',
               PRIMARY KEY (`id`),
-              KEY `index_individual_possible_matches_on_individual_id` (`individual_id`),
-              KEY `index_individual_possible_matches_on_object_table` (`object_table`),
-              KEY `index_individual_possible_matches_on_object_id` (`object_id`),
-              KEY `index_individual_possible_matches_on_resolved` (`resolved`)
+              KEY `index_individual_partial_matches_on_individual_id` (`individual_id`),
+              KEY `index_individual_partial_matches_on_object_table` (`object_table`),
+              KEY `index_individual_partial_matches_on_object_id` (`object_id`),
+              KEY `index_individual_partial_matches_on_resolved` (`resolved`)
             )
         """)
 

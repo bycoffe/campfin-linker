@@ -10,14 +10,14 @@ class DB(object):
         self.db_config = yaml.load(open('config/database.yml'))
         self.individuals_config = self.db_config['individuals']
         self.individuals = [x for x in self.db_config['databases'] if x['database'] == self.individuals_config['database']][0]
-        self.possible_config = self.db_config['possibles']
-        self.possible = [x for x in self.db_config['databases'] if x['database'] == self.possible_config['database']][0]
+        self.partial_matches_config = self.db_config['partial_matches']
+        self.partial_matches = [x for x in self.db_config['databases'] if x['database'] == self.partial_matches_config['database']][0]
         self.dbs = {
-            "possibles": MySQLdb.connect(**self.db_config_for(self.possible)),
+            "partial_matches": MySQLdb.connect(**self.db_config_for(self.partial_matches)),
             "individuals": MySQLdb.connect(**self.db_config_for(self.individuals))
         }
         self.dbcs = {"individuals": self.dbs["individuals"].cursor(MySQLdb.cursors.DictCursor),
-                     "possibles": self.dbs["possibles"].cursor(MySQLdb.cursors.DictCursor),
+                     "partial_matches": self.dbs["partial_matches"].cursor(MySQLdb.cursors.DictCursor),
         }
         self.set_table()
 
@@ -101,17 +101,17 @@ class DB(object):
               (self.tablename, self.table_config['individual_id'], c['individual_id'], c['id']))
         self.dbs['linker'].commit()
 
-    def create_new_possible_matches(self, new_possible_matches):
-        if len(new_possible_matches) > 0:
-            str_insert = "insert into %s (individual_id, object_table, object_id, confidence)" % (self.possible_config['table_name'])
-            self.dbcs['possibles'].executemany(str_insert + """
+    def create_new_partial_matches(self, new_partial_matches):
+        if len(new_partial_matches) > 0:
+            str_insert = "insert into %s (individual_id, object_table, object_id, confidence)" % (self.partial_matches_config['table_name'])
+            self.dbcs['partial_matches'].executemany(str_insert + """
               values (%s, %s, %s, %s)
               """,
-              ((m['individual_id'], self.tablename, m['object_id'], m['confidence']) for m in new_possible_matches))
-            self.dbs['possibles'].commit()
+              ((m['individual_id'], self.tablename, m['object_id'], m['confidence']) for m in new_partial_matches))
+            self.dbs['partial_matches'].commit()
 
-    def r_get_next_possible_match(self):
-        self.dbcs['possibles'].execute("""
+    def r_get_next_partial_match(self):
+        self.dbcs['partial_matches'].execute("""
           select %s.id as id, %s.object_id as object_id, %s.individual_id as individual_id, %s.%s as name1, %s.%s as name2, %s.%s as city1, %s.%s as city2, %s.%s as state1, %s.%s as state2, %s.%s as zip1, %s.%s as zip2, %s.%s as occupation1, %s.%s as occupation2, %s.%s as employer1, %s.%s as employer2
           from %s, %s, %s
           where resolved = false and
@@ -121,15 +121,15 @@ class DB(object):
           order by %s.individual_id
           limit 1
         """ %
-        (self.possible_config['table_name'], self.possible_config['table_name'], self.possible_config['table_name'], self.tablename, self.table_config['full_name'], self.individuals_config['table_name'], self.individuals_config['full_name'], self.tablename, self.table_config['city'], self.individuals_config['table_name'], self.individuals_config['city'], self.tablename, self.table_config['state'], self.individuals_config['table_name'], self.individuals_config['state'], self.tablename, self.table_config['zipcode'], self.individuals_config['table_name'], self.individuals_config['zipcode'], self.tablename, self.table_config['occupation'], self.individuals_config['table_name'], self.individuals_config['occupation'], self.tablename, self.table_config['employer'], self.individuals_config['table_name'], self.individuals_config['employer'],
-        self.possible_config['table_name'], self.tablename, self.individuals_config['table_name'], self.possible_config['table_name'], self.individuals_config['table_name'], self.individuals_config['id'], self.possible_config['table_name'], self.tablename, self.possible_config['table_name'], self.tablename, self.table_config['id'], self.possible_config['table_name']))
-        return self.dbcs['possibles'].fetchone()
+        (self.partial_matches_config['table_name'], self.partial_matches_config['table_name'], self.partial_matches_config['table_name'], self.tablename, self.table_config['full_name'], self.individuals_config['table_name'], self.individuals_config['full_name'], self.tablename, self.table_config['city'], self.individuals_config['table_name'], self.individuals_config['city'], self.tablename, self.table_config['state'], self.individuals_config['table_name'], self.individuals_config['state'], self.tablename, self.table_config['zipcode'], self.individuals_config['table_name'], self.individuals_config['zipcode'], self.tablename, self.table_config['occupation'], self.individuals_config['table_name'], self.individuals_config['occupation'], self.tablename, self.table_config['employer'], self.individuals_config['table_name'], self.individuals_config['employer'],
+        self.partial_matches_config['table_name'], self.tablename, self.individuals_config['table_name'], self.partial_matches_config['table_name'], self.individuals_config['table_name'], self.individuals_config['id'], self.partial_matches_config['table_name'], self.tablename, self.partial_matches_config['table_name'], self.tablename, self.table_config['id'], self.partial_matches_config['table_name']))
+        return self.dbcs['partial_matches'].fetchone()
 
     def r_ignore_match(self, match):
-        self.dbcs['possibles'].execute("update %s set resolved = true where object_table = '%s' and object_id = %s" % (self.possible_config['table_name'], self.tablename, match['object_id']))
-        self.dbs['possibles'].commit()
+        self.dbcs['partial_matches'].execute("update %s set resolved = true where object_table = '%s' and object_id = %s" % (self.partial_matches_config['table_name'], self.tablename, match['object_id']))
+        self.dbs['partial_matches'].commit()
 
     def r_resolve_match(self, match):
-        self.dbcs['possibles'].execute("update %s set %s = %s where id = %s" % (self.tablename, self.table_config['individual_id'], match['individual_id'], match['object_id']))
-        self.dbcs['possibles'].execute("update %s set resolved = true where object_table = '%s' and object_id = %s" % (self.possible_config['table_name'], self.tablename, match['object_id']))
-        self.dbs['possibles'].commit()
+        self.dbcs['partial_matches'].execute("update %s set %s = %s where id = %s" % (self.tablename, self.table_config['individual_id'], match['individual_id'], match['object_id']))
+        self.dbcs['partial_matches'].execute("update %s set resolved = true where object_table = '%s' and object_id = %s" % (self.partial_matches_config['table_name'], self.tablename, match['object_id']))
+        self.dbs['partial_matches'].commit()

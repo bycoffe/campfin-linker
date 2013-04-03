@@ -19,7 +19,7 @@ else:
 for dbname, table in tables_to_resolve:
     db.set_table(dbname, table)
     while True:
-        match = db.r_get_next_possible_match()
+        match = db.r_get_next_partial_match()
         if match == None:
             break
 

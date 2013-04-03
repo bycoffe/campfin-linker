@@ -41,7 +41,7 @@ class Linker(object):
             new_contributors = []
             new_contributors_by_namekey = {}
             used_name_keys = {}
-            new_possible_matches = []
+            new_partial_matches = []
             for uc in unlinked_contributions:
                 uc_features = self._contribution_features(uc)
                 name_key = self._name_key(uc_features)
@@ -59,7 +59,7 @@ class Linker(object):
 
                 # Find match in contributors
                 new_contributors_for_key = new_contributors_by_namekey[name_key] if name_key in new_contributors_by_namekey else []
-                contributor_id = self._first_matching_contributor_id(uc_features, contributors + new_contributors_for_key, new_possible_matches)
+                contributor_id = self._first_matching_contributor_id(uc_features, contributors + new_contributors_for_key, new_partial_matches)
 
                 # If no contributor was found, create a new one
                 if contributor_id == None:
@@ -79,12 +79,12 @@ class Linker(object):
 
             self.db.create_contributors(new_contributors)
             self.db.save_contributions(unlinked_contributions)
-            self.db.create_new_possible_matches(new_possible_matches)
+            self.db.create_new_partial_matches(new_partial_matches)
             print "Processed " + str(len(unlinked_contributions)) + " contributions in " + str(datetime.now() - ts_start)
 
     # Find the first matching contributor in a list
-    def _first_matching_contributor_id(self, contribution_features, contributors, new_possible_matches):
-        possible_matches_to_add = []
+    def _first_matching_contributor_id(self, contribution_features, contributors, new_partial_matches):
+        partial_matches_to_add = []
         for c in contributors:
             c1f, c2f = contribution_features, c
             compstring1 = '%s %s' % (c1f['first_name'], c1f['city'])
@@ -96,8 +96,8 @@ class Linker(object):
             if edge[0][1] > CONFIDENCE_KEEP:
                 return c['id']
             elif edge[0][1] > CONFIDENCE_CHECK:
-                possible_matches_to_add.append({'object_id': contribution_features['id'], 'individual_id': c['id'], 'confidence': edge[0][1]})
-        new_possible_matches.extend(possible_matches_to_add)
+                partial_matches_to_add.append({'object_id': contribution_features['id'], 'individual_id': c['id'], 'confidence': edge[0][1]})
+        new_partial_matches.extend(partial_matches_to_add)
         return None
 
     def _contribution_features(self, contribution):
