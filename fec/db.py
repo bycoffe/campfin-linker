@@ -73,9 +73,9 @@ class DB(object):
 
     def next_unlinked_contributions(self):
         self.dbcs['linker'].execute("""
-          select %s as id, %s as full_name, %s as first_name, %s as middle_name, %s as last_name, %s as city, %s as state, %s as zipcode, %s as employer, %s as occupation, %s as individual_id from %s where %s is null limit %s
+          select %s as id, %s as full_name, %s as city, %s as state, %s as zipcode, %s as employer, %s as occupation, %s as individual_id from %s where %s is null limit %s
           """ %
-          (self.table_config['id'], self.table_config['full_name'], self.table_config['first_name'], self.table_config['middle_name'], self.table_config['last_name'], self.table_config['city'], self.table_config['state'], self.table_config['zipcode'], self.table_config['employer'], self.table_config['occupation'], self.table_config['individual_id'], self.tablename, self.table_config['individual_id'], CHUNK_SIZE))
+          (self.table_config['id'], self.table_config['full_name'], self.table_config['city'], self.table_config['state'], self.table_config['zipcode'], self.table_config['employer'], self.table_config['occupation'], self.table_config['individual_id'], self.tablename, self.table_config['individual_id'], CHUNK_SIZE))
         return self.dbcs['linker'].fetchall()
 
     def potential_contributors(self, contribution):
