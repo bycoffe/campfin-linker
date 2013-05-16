@@ -1,13 +1,13 @@
 # Campaign Finance Linker
 
-This repository contains a series of scripts that can be used to uniquely identify individual donors within campaign
-finance data.
+Campaign finance disclosure laws help us understand how money influences our political system, but inconsistencies in
+the data make it hard to track individuals across contributions and through different elections. Campaign finance data
+generally includes information about each contribution such as the contributor's name, address, occupation and employer,
+but these individual contributors aren't uniquely identified. Misspelled names or changing job titles -- among other
+inconsistencies -- make identifying individual donors a challenge.
 
-Campaign finance data generally includes information about each contribution such as the contributor's name, address,
-occupation and employer, but these individual contributors aren't uniquely identified. Misspelled names or changing
-job titles -- among other inconsistencies -- make identifying individual donors a challenge.
-
-This project uses machine learning to link individuals within a single dataset or across multiple datasets. A linked
+This project contains a series of scripts that can be used to uniquely identify individual donors within campaign
+finance data. It uses machine learning to link individuals within a single dataset or across multiple datasets. A linked
 dataset from the [Center for Responsive Politics](http://www.opensecrets.org) is used as training data for a random
 forest classifier. The classifier correctly identifies individuals about 96% of the time.
 
@@ -20,7 +20,7 @@ to the *individuals* table.
 
 This project was originally modeled on Chase Davis' [fec-standardizer](https://github.com/cjdd3b/fec-standardizer).
 Many of the ideas from that code are contained here; his [wiki](https://github.com/cjdd3b/fec-standardizer/wiki)
-provides a great deal of background on the methods used within.
+provides a great background on the methods used within.
 
 ## Installation
 
