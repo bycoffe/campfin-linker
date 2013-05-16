@@ -121,7 +121,8 @@ class Trainer(object):
             return counter / 5.0
 
         elif key == 'zipcode_region':
-            if self.clean_str(c1['zipcode'])[0] == self.clean_str(c2['zipcode'])[0]:
+            z1, z2 = [self.clean_str(x) for x in [c1['zipcode'], c2['zipcode']]]
+            if len(z1) > 0 and len(z2) > 0 and z1[0] == z2[0]:
                 return 1
             return 0
 
