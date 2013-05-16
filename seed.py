@@ -1,4 +1,4 @@
 from optparse import OptionParser
-from fec.seeder import *
+from campfin.seeder import *
 
 Seeder().seed()

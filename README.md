@@ -1,4 +1,4 @@
-# FEC Linker
+# Campaign Finance Linker
 
 This repository contains a series of scripts that can be used to uniquely identify individual donors within campaign
 finance data.
@@ -106,7 +106,7 @@ The default chunk size (number of contribution records to process at one time) i
 if you'd like to do mysql I/O more or less often.
 
 Records from the *individuals* table are cached in memory to reduce mysql queries. You can tweak the size of the cache by changing
-MAX_CONTRIBUTOR_CACHE_SIZE in fec/linker.py. It defaults to about 1Gb.
+MAX_CONTRIBUTOR_CACHE_SIZE in campfin/linker.py. It defaults to about 1Gb.
 
 You can use test.py to evaluate the machine learning performance and tweak parameters if desired.
 

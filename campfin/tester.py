@@ -1,4 +1,4 @@
-from fec.trainer import *
+from campfin.trainer import *
 import cPickle as pickle
 from sklearn.ensemble import RandomForestClassifier
 

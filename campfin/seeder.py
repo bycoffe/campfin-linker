@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from fec.db import *
+from campfin.db import *
 
 
 class Seeder(object):

@@ -1,5 +1,5 @@
 from optparse import OptionParser
-from fec.linker import *
+from campfin.linker import *
 
 parser = OptionParser()
 parser.add_option("-d", "--db", dest="dbname",

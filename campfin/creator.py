@@ -1,4 +1,4 @@
-from fec.db import *
+from campfin.db import *
 
 class Creator(object):
 

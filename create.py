@@ -1,4 +1,4 @@
 from optparse import OptionParser
-from fec.creator import *
+from campfin.creator import *
 
 Creator().create()

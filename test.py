@@ -1,5 +1,5 @@
 import os
-from fec.tester import *
+from campfin.tester import *
 
 if not os.path.isfile("data/crp_slice.csv"):
     os.system("unzip data/crp_slice.zip -d data")
