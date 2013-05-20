@@ -76,7 +76,7 @@ Instead of creating a new table, you could also just append new records to the s
 
 ## Notes
 
-For efficiency, the scripts only compares records that have the same values for last name and state.
+For efficiency, the linker only compares records that have the same values for last name and state.
 
 Linking larger datasets can take a long time; the full set of 3.5 million 2012 contributions took about 5 hours to link on a 2 GHz MacBook Pro. You can kill and restart the `link.py` script at any time. (It would be fairly easy to parallelize the process so the script can be run on multiple machines, each of which pulls out &mdash; and locks &mdash; some records to link until there are no records
 left).
@@ -84,9 +84,9 @@ left).
 As the `individuals` table grows, future linkages will take longer. If you don't need records linked across projects, you can use a different `individuals` tables for each one by creating a new table and modifying database.yml to point to the
 correct table.
 
-Records from the `individuals` table are cached in memory to reduce mysql queries. Depending on how much RAM you have available, you can tweak the size of the cache by changing `MAX_CONTRIBUTOR_CACHE_SIZE` in `campfin/linker.py`. (Default is 1 GB).
+Records from the `individuals` table are cached in memory to reduce MySQL queries. Depending on how much RAM you have available, you can tweak the size of the cache by changing `MAX_CONTRIBUTOR_CACHE_SIZE` in `campfin/linker.py`. (Default is 1 GB).
 
-You can use `test.py` to evaluate the machine learning performance and tweak parameters if desired.
+Use `test.py` to evaluate the machine learning performance and tweak the parameters
 
 ## Authors
 
