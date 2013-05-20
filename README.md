@@ -1,121 +1,98 @@
+     _   _,              |\ o          |\ o       |)   _  ,_  
+    /   / |  /|/|/|  |/\_|/ | /|/|     |/ | /|/|  |/) |/ /  | 
+    \__/\/|_/ | | |_/|_/ |_/|/ | |_/   |_/|/ | |_/| \/|_/   |/
+                    (|   |)
 # Campaign Finance Linker
 
 Campaign finance disclosure laws help us understand how money influences our political system, but inconsistencies in
-the data make it hard to track individuals across contributions and through different elections. Campaign finance data
-generally includes information about each contribution such as the contributor's name, address, occupation and employer,
-but these individual contributors aren't uniquely identified. Misspelled names or changing job titles -- among other
-inconsistencies -- make identifying individual donors a challenge.
+the data make it hard to get a full picture of where the money comes from. This library uses a machine learning technique called 
+[Random forest classification](http://en.wikipedia.org/wiki/Random_forest) to group records by the individual who made
+the contribution.
 
-This project contains a series of scripts that can be used to uniquely identify individual donors within campaign
-finance data. It uses machine learning to link individuals within a single dataset or across multiple datasets. A linked
-dataset from the [Center for Responsive Politics](http://www.opensecrets.org) is used as training data for a random
-forest classifier. The classifier correctly identifies individuals about 96% of the time.
+## How it works
 
-Your campaign finance data must be loaded into mysql to use these scripts. Since most data is released as delimited flat
-files, it's fairly easy to load them into mysql for processing even if you aren't using it as your primary data store. Two
-tables are maintained; an *individuals* table, which contains a record for each individual who has ever made a contribution,
-and an *individual_partial_matches* table, which contains potential matches that fell below the threshold to be considered a certain
-match. Any table containing campaign finance data that you feed into the system must contain an empty column that will be linked
-to the *individuals* table.
+Campaign finance records generally include a contributor's name, address, occupation and employer,
+but not a unique identifier for the individual. Inconsistencies like misspelled names or changing job titles make it difficult to connect records by donor.
 
-This project was originally modeled on Chase Davis' [fec-standardizer](https://github.com/cjdd3b/fec-standardizer).
-Many of the ideas from that code are contained here; his [wiki](https://github.com/cjdd3b/fec-standardizer/wiki)
-provides a great background on the methods used within.
+This library can link contributions within a single dataset or across multiple datasets. It could, for example, 
+match individual contribution records from the 2012 presidential election, connect records across multiple years of federal election data, 
+or find connections between contributions to candidates in a local election and contributions to candidates who ran for president.
+
+To train the classifier, we use an already-linked dataset (`data/crp_slice.zip`) from the [Center for Responsive Politics](http://www.opensecrets.org).
+
+This project was inspired by Chase Davis' [fec-standardizer](https://github.com/cjdd3b/fec-standardizer). 
+See his [wiki](https://github.com/cjdd3b/fec-standardizer/wiki) for background.
 
 ## Installation
 
-    pip install -r requirements.txt
+```pip install -r requirements.txt```
 
 ## Getting started
 
-We suggest you follow these steps the first time you link a dataset. This guide will create the necessary mysql schema
-for running a linkage, then download, import, and link some FEC individual contribution data for the 2014 election cycle.
-After you've gone through the process once, it will be easier to link a different set of contributions.
+Follow these steps to create the necessary MySQL schema and to download, import, and link individual contribution data for the 2014 election cycle from the Federal Election Commision.
 
-Create a local database.yml and edit the connection properties to match your system:
+1) Create a `database.yml` and edit the connection properties to match your system:
 
     cp config/database.sample.yml config/database.yml
 
-Create three tables (individuals, individual_partial_matches, individual_contributions_2014) for your linkage:
+2) Create three tables (`individuals`, `individual_partial_matches`, `individual_contributions_2014`) for your linkage:
 
     python create.py
 
-Download and import the first 30,000 individual contributions from the 2014 cycle:
+3) Download and import the first 30,000 individual contributions from the 2014 cycle:
 
     python seed.py
 
-Create the training set needed to run a linkage:
+4) Import the training data:
 
     python train.py
 
-Link the 2014 individual contribution data:
+5) Train the classifier and link the 2014 individual contribution data:
 
     python link.py
 
-After the script finishes, the 30,000 contributions you imported are linked to canonical individuals. You'll see that the
-*individual_contributions_2014* table has 30,000 records, while the *individuals* table has roughly 26,000. The difference in the
-sizes of those tables represent multiple contributions by a person. Each contribution record is linked to a canonical
-individual by the *individual_id* field.
+The 30,000 contributions (`individual_contributions_2014`) are now linked to about 26,000 canonical individuals (`individuals`). The 4,000 record difference is the result of multiple contributions being linked to a single individual. Each contribution record is linked to a canonical individual by the `individual_id` field.
 
-The *individual_partial_matches* table contains roughly 170 records, which represent the pairs that didn't satisfy the threshold
-to be considered a match by the learning algorithm, but possibly are. These potential matches can be resolved with the resolve.py
-script, or you could use another method to determine whether they're actually matches. They can also be ignored, which would result in
+The `individual_partial_matches` table contains roughly 170 records, which represent the pairs that didn't satisfy the threshold to be considered a match by the learning algorithm, but possibly are. You can resolve these potential matches with the `resolve.py` script, or you could use another method to determine whether they're actually matches. They can also be ignored, which results in
 a slightly less precise linkage.
 
 ## Linking a second dataset
 
-Linking a second dataset is easier than linking the first. Note that you don't have to run train.py again -- this only has to be
-done once. The steps are:
+Linking a second dataset is easier than linking the first. (The classifier only needs to be trained once, so you don't have to run `train.py` again.) The steps are:
 
-1. Create a table with the new data (make sureit contains an individual_id field to link to *individuals*)
-2. Add your new table to *linkable_tables* in *database.yml*. You can override field names for the new table if convenient
-3. Link the new dataset by specifying the new table name:
+1) Create a table with the new data (make sure it contains an `individual_id` field to link to `individuals`)
+
+2) Add your new table to `linkable_tables` in `database.yml`. (You can override field names for the new table if needed.)
+
+3) Link the new dataset by specifying the new table name:
+
 
     python link.py --table=new_table
 
-Since this second linkage shares the *individuals* table with the first linkage, some individuals from the 2014 cycle may now be linked to
+Since this second linkage shares the `individuals` table with the first linkage, some individuals from the 2014 cycle may now be linked to
 the dataset you just imported.
 
-Note that rather than creating a new table, you could also just append new records to the same *individual_contributions_2014* table you used
-for the example linkage and rerun the linkage, as long as you don't delete the existing data in the *individual_id* field.
-
-## Methodology
-
-The process to link a single table is:
-
-* Pull out 5,000 unlinked records from the table to be linked
-* For each record, get all possible matches from the *individuals* table (people with the same last name, from the same state)
-* Find the first matching individual record for the current contribution; if one doesn't exist, create it
-* Link the contribution to the found (or newly created) individual
+Instead of creating a new table, you could also just append new records to the same `individual_contributions_2014` table you used for the example linkage and rerun the linkage, as long as you don't delete the existing data in the `individual_id` field.
 
 ## Notes
 
-Linked individuals must have the same values for last name and state. This reduces the number of records that must be compared
-by a huge amount (making it possible to run this on millions of records), but according to our tests, sacrifices about 1% of accuracy.
+For efficiency, the scripts only compares records that have the same values for last name and state.
 
-Linking larger datasets can take a long time; the full set of 3.5 million 2012 contributions takes about 5 hours to link on a decent
-computer. You can kill and restart the link.py script at any point without hurting anything. If necessary, it would be fairly easy to parallelize the
-process so the script can be run on multiple machines, each of which pulls out (and locks) some records to link until there are no records
-left.
+Linking larger datasets can take a long time; the full set of 3.5 million 2012 contributions took about 5 hours to link on a 2 GHz MacBook Pro. You can kill and restart the `link.py` script at any time. (It would be fairly easy to parallelize the process so the script can be run on multiple machines, each of which pulls out &mdash; and locks &mdash; some records to link until there are no records
+left).
 
-As the *individuals* table grows, future linkages will take longer. You may wish to maintain multiple *individuals* tables for different projects
-if you don't need records linked across projects. This can be accomplished by creating a new table and modifying database.yml to point to the
+As the `individuals` table grows, future linkages will take longer. If you don't need records linked across projects, you can use a different `individuals` tables for each one by creating a new table and modifying database.yml to point to the
 correct table.
 
-The default chunk size (number of contribution records to process at one time) is 5,000, but can be tweaked by changing CHUNK_SIZE in db.py
-if you'd like to do mysql I/O more or less often.
+Records from the `individuals` table are cached in memory to reduce mysql queries. Depending on how much RAM you have available, you can tweak the size of the cache by changing `MAX_CONTRIBUTOR_CACHE_SIZE` in `campfin/linker.py`. (Default is 1 GB).
 
-Records from the *individuals* table are cached in memory to reduce mysql queries. You can tweak the size of the cache by changing
-MAX_CONTRIBUTOR_CACHE_SIZE in campfin/linker.py. It defaults to about 1Gb.
-
-You can use test.py to evaluate the machine learning performance and tweak parameters if desired.
+You can use `test.py` to evaluate the machine learning performance and tweak parameters if desired.
 
 ## Authors
 
 - Jay Boice, jay.boice@huffingtonpost.com
 - Aaron Bycoffe, bycoffe@huffingtonpost.com
-- Chase Davis, chase.davis@gmail.com
 
 ## Copyright
 
-Copyright © 2013 The Huffington Post. See LICENSE for details.
+Copyright &copy; 2013 The Huffington Post. See LICENSE for details.
