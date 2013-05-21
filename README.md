@@ -1,5 +1,5 @@
-     _   _,              |\ o          |\ o       |)   _  ,_  
-    /   / |  /|/|/|  |/\_|/ | /|/|     |/ | /|/|  |/) |/ /  | 
+     _   _,              |\ o          |\ o       |)   _  ,_
+    /   / |  /|/|/|  |/\_|/ | /|/|     |/ | /|/|  |/) |/ /  |
     \__/\/|_/ | | |_/|_/ |_/|/ | |_/   |_/|/ | |_/| \/|_/   |/
                     (|   |)
 # Campaign Finance Linker
@@ -12,18 +12,18 @@ the data make it hard to get a full picture of where the money comes from. This 
 Campaign finance records generally include a contributor's name, address, occupation and employer,
 but not a unique identifier for the individual. Inconsistencies like misspelled names or changing job titles make it difficult to connect records by donor.
 
-This library can link contributions within a single dataset or across multiple datasets. It could, for example, 
-match individual contribution records from the 2012 presidential election, connect records across multiple years of federal election data, 
+This library can link contributions within a single dataset or across multiple datasets. It could, for example,
+match individual contribution records from the 2012 presidential election, connect records across multiple years of federal election data,
 or find connections between contributions to candidates in a local election and contributions to candidates who ran for president.
 
 To train the classifier, we use an already-linked dataset (`data/crp_slice.zip`) from the [Center for Responsive Politics](http://www.opensecrets.org).
 
-This project was inspired by Chase Davis' [fec-standardizer](https://github.com/cjdd3b/fec-standardizer). 
+This project was inspired by Chase Davis' [fec-standardizer](https://github.com/cjdd3b/fec-standardizer).
 See his [wiki](https://github.com/cjdd3b/fec-standardizer/wiki) for background.
 
 ## Installation
 
-	pip install -r requirements.txt
+  pip install -r requirements.txt
 
 ## Getting started
 
@@ -37,7 +37,7 @@ Follow these steps to create the necessary MySQL schema and to download, import,
 
     python create.py
 
-3) Download and import the first 30,000 individual contributions from the 2014 cycle:
+3) Download and import the first 20,000 individual contributions from the 2014 cycle:
 
     python seed.py
 
@@ -49,9 +49,9 @@ Follow these steps to create the necessary MySQL schema and to download, import,
 
     python link.py
 
-The 30,000 contributions (`individual_contributions_2014`) are now linked to about 26,000 canonical individuals (`individuals`). The 4,000 record difference is the result of multiple contributions being linked to a single individual. Each contribution record is linked to a canonical individual by the `individual_id` field.
+The 20,000 contributions (`individual_contributions_2014`) are now linked to about 18,000 canonical individuals (`individuals`). The 2,000 record difference is the result of multiple contributions being linked to a single individual. Each contribution record is linked to a canonical individual by the `individual_id` field.
 
-The `individual_partial_matches` table contains roughly 170 records, which represent the pairs that didn't satisfy the threshold to be considered a match by the learning algorithm, but possibly are. You can resolve these potential matches with the `resolve.py` script, or you could use another method to determine whether they're actually matches. They can also be ignored, which results in
+The `individual_partial_matches` table contains roughly 30 records, which represent the pairs that didn't satisfy the threshold to be considered a match by the learning algorithm, but possibly are. You can resolve these potential matches with the `resolve.py` script, or you could use another method to determine whether they're actually matches. They can also be ignored, which results in
 a slightly less precise linkage.
 
 ## Linking a second dataset

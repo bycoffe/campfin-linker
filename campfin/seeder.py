@@ -28,7 +28,7 @@ class Seeder(object):
         print "Unzipping FEC file"
         subprocess.call(["unzip", filepath, "-d", self.path])
 
-    def head_fec_file(self, lines=30000):
+    def head_fec_file(self, lines=20000):
         print "Extracting first %s rows of FEC file" % lines
         filepath = os.path.join(self.path, 'itcont2.txt')
         with open(filepath, 'w') as fh:
