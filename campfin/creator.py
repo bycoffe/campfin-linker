@@ -6,6 +6,7 @@ class Creator(object):
         self.db = DB()
 
     def create(self):
+        print "Creating tables"
         self.db.execute("individuals", """
             CREATE TABLE IF NOT EXISTS `individuals` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -62,7 +63,7 @@ class Creator(object):
               `filing_number` varchar(255) DEFAULT NULL,
               `memo_code` varchar(255) DEFAULT NULL,
               `memo_text` varchar(255) DEFAULT NULL,
-              `sub_id` int(11) DEFAULT NULL,
+              `sub_id` varchar(255) DEFAULT NULL,
               `individual_id` int(11) DEFAULT NULL,
               PRIMARY KEY (`id`),
               KEY `index_individual_contributions_on_individual_id` (`individual_id`)
