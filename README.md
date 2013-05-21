@@ -5,9 +5,7 @@
 # Campaign Finance Linker
 
 Campaign finance disclosure laws help us understand how money influences our political system, but inconsistencies in
-the data make it hard to get a full picture of where the money comes from. This library uses a machine learning technique called 
-[Random forest classification](http://en.wikipedia.org/wiki/Random_forest) to group records by the individual who made
-the contribution.
+the data make it hard to get a full picture of where the money comes from. This library uses machine learning -- specifically, a [random forest classifier](http://en.wikipedia.org/wiki/Random_forest) -- to group records by the individual who made the contribution.
 
 ## How it works
 
@@ -25,7 +23,7 @@ See his [wiki](https://github.com/cjdd3b/fec-standardizer/wiki) for background.
 
 ## Installation
 
-```pip install -r requirements.txt```
+	pip install -r requirements.txt
 
 ## Getting started
 
@@ -43,9 +41,9 @@ Follow these steps to create the necessary MySQL schema and to download, import,
 
     python seed.py
 
-4) Import the training data:
+4) Generate a training set from the linked CRP data:
 
-    python train.py
+    python generate.py
 
 5) Train the classifier and link the 2014 individual contribution data:
 
@@ -58,14 +56,13 @@ a slightly less precise linkage.
 
 ## Linking a second dataset
 
-Linking a second dataset is easier than linking the first. (The classifier only needs to be trained once, so you don't have to run `train.py` again.) The steps are:
+Linking a second dataset is easier than linking the first. (The training set only needs to be generated once, so you don't have to run `generate.py` again.) The steps are:
 
-1) Create a table with the new data (make sure it contains an `individual_id` field to link to `individuals`)
+1) Create a table with the new data (make sure it contains an empty `individual_id` field to link to `individuals`)
 
 2) Add your new table to `linkable_tables` in `database.yml`. (You can override field names for the new table if needed.)
 
 3) Link the new dataset by specifying the new table name:
-
 
     python link.py --table=new_table
 
@@ -76,7 +73,7 @@ Instead of creating a new table, you could also just append new records to the s
 
 ## Notes
 
-For efficiency, the linker only compares records that have the same values for last name and state.
+For performance reasons, the linker only compares records that have the same values for last name and state.
 
 Linking larger datasets can take a long time; the full set of 3.5 million 2012 contributions took about 5 hours to link on a 2 GHz MacBook Pro. You can kill and restart the `link.py` script at any time. (It would be fairly easy to parallelize the process so the script can be run on multiple machines, each of which pulls out &mdash; and locks &mdash; some records to link until there are no records
 left).
@@ -84,9 +81,9 @@ left).
 As the `individuals` table grows, future linkages will take longer. If you don't need records linked across projects, you can use a different `individuals` tables for each one by creating a new table and modifying database.yml to point to the
 correct table.
 
-Records from the `individuals` table are cached in memory to reduce MySQL queries. Depending on how much RAM you have available, you can tweak the size of the cache by changing `MAX_CONTRIBUTOR_CACHE_SIZE` in `campfin/linker.py`. (Default is 1 GB).
+Records from the `individuals` table are cached in memory to reduce MySQL queries. Depending on how much RAM you have available, you can tweak the size of the cache by changing `MAX_CONTRIBUTOR_CACHE_SIZE` in `campfin/linker.py`. (Default is about 1 GB).
 
-Use `test.py` to evaluate the machine learning performance and tweak the parameters
+Use `test.py` to evaluate the machine learning performance and tweak some parameters
 
 ## Authors
 
