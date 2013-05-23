@@ -5,7 +5,7 @@
 # Campaign Finance Linker
 
 Campaign finance disclosure laws help us understand how money influences our political system, but inconsistencies in
-the data make it hard to get a full picture of where the money comes from. This library uses machine learning -- specifically, a [random forest classifier](http://en.wikipedia.org/wiki/Random_forest) -- to connect donations from the same contributor.
+the data make it hard to get a full picture of where the money comes from. This library uses machine learning -- specifically, a technique known as [random forest](http://en.wikipedia.org/wiki/Random_forest) -- to connect donations from the same contributor.
 
 ## How it works
 
@@ -19,7 +19,7 @@ or find connections between contributions to candidates in a local election and 
 To train the classifier, we use an already-linked dataset (`data/crp_slice.zip`) from the [Center for Responsive Politics](http://www.opensecrets.org).
 
 This project was inspired by [fec-standardizer](https://github.com/cjdd3b/fec-standardizer) from The New York Times' [Chase Davis](http://chasedavis.com/), 
-who first applied the random forrest method to campaign finance data and identified the correct feature set for 
+who first applied the random forest method to campaign finance data and identified the correct feature set for 
 grouping records by donor. See his excellent [wiki](https://github.com/cjdd3b/fec-standardizer/wiki) for background.
 
 ## Installation
