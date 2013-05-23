@@ -23,7 +23,7 @@ See his [wiki](https://github.com/cjdd3b/fec-standardizer/wiki) for background.
 
 ## Installation
 
-  pip install -r requirements.txt
+	pip install -r requirements.txt
 
 ## Getting started
 
