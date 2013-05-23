@@ -5,7 +5,7 @@
 # Campaign Finance Linker
 
 Campaign finance disclosure laws help us understand how money influences our political system, but inconsistencies in
-the data make it hard to get a full picture of where the money comes from. This library uses machine learning -- specifically, a [random forest classifier](http://en.wikipedia.org/wiki/Random_forest) -- to find connections records by the individual who made the contribution.
+the data make it hard to get a full picture of where the money comes from. This library uses machine learning -- specifically, a [random forest classifier](http://en.wikipedia.org/wiki/Random_forest) -- to connect records from the same individual.
 
 ## How it works
 
