@@ -18,8 +18,9 @@ or find connections between contributions to candidates in a local election and 
 
 To train the classifier, we use an already-linked dataset (`data/crp_slice.zip`) from the [Center for Responsive Politics](http://www.opensecrets.org).
 
-This project was inspired by Chase Davis' [fec-standardizer](https://github.com/cjdd3b/fec-standardizer).
-See his [wiki](https://github.com/cjdd3b/fec-standardizer/wiki) for background.
+This project was inspired by [fec-standardizer](https://github.com/cjdd3b/fec-standardizer) from The New York Times' [Chase Davis](http://chasedavis.com/), 
+who first applied the Random Forrest method to campaign finance data and identified the correct feature set for 
+grouping records by donor. See his excellent [wiki](https://github.com/cjdd3b/fec-standardizer/wiki) for background.
 
 ## Installation
 
