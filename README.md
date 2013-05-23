@@ -24,6 +24,8 @@ grouping records by donor. See his excellent [wiki](https://github.com/cjdd3b/fe
 
 ## Installation
 
+This project requires Python and MySQL. To install the required Python packages, run:
+
 	pip install -r requirements.txt
 
 ## Getting started
