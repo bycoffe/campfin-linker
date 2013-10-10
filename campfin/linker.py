@@ -2,6 +2,7 @@ from datetime import datetime
 from sklearn.ensemble import RandomForestClassifier
 from campfin.db import *
 from campfin.trainer import *
+from progress.bar import Bar
 
 CONFIDENCE_KEEP = 0.65
 CONFIDENCE_CHECK = 0.51
@@ -26,10 +27,13 @@ class Linker(object):
         self.db.set_table(dbname, table)
         self.table = table
         print "Linking contributions in " + self.db.db['database'] + ":" + self.table
+        unlinked_contributions_count = self.db.unlinked_contributions_count()
+        bar = Bar('Processing', max=unlinked_contributions_count, suffix='%(remaining)d remaining. Completion in %(eta)ds.')
         max_contributor_id = self.db.next_contributor_id()
         contributor_cache = {}
         contributor_cache_size = 0
         while True:
+
             ts_start = datetime.now()
 
             # Get the next batch of contributions to process
@@ -80,7 +84,9 @@ class Linker(object):
             self.db.create_contributors(new_contributors)
             self.db.save_contributions(unlinked_contributions)
             self.db.create_new_partial_matches(new_partial_matches)
-            print "Processed " + str(len(unlinked_contributions)) + " contributions in " + str(datetime.now() - ts_start)
+            bar.next(len(unlinked_contributions))
+
+        bar.finish()
 
     # Find the first matching contributor in a list
     def _first_matching_contributor_id(self, contribution_features, contributors, new_partial_matches):
