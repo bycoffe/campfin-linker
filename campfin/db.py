@@ -71,6 +71,10 @@ class DB(object):
             maxid = 0
         return maxid + 1
 
+    def unlinked_contributions_count(self):
+        self.dbcs['linker'].execute("select COUNT(*) from %s where %s is null" % (self.tablename, self.table_config['individual_id']))
+        return int(self.dbcs['linker'].fetchone()['COUNT(*)'])
+
     def next_unlinked_contributions(self):
         self.dbcs['linker'].execute("""
           select %s as id, %s as full_name, %s as city, %s as state, %s as zipcode, %s as employer, %s as occupation, %s as individual_id from %s where %s is null limit %s
