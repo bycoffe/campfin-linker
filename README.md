@@ -92,6 +92,7 @@ Use `test.py` to evaluate the machine learning performance and tweak some parame
 
 - Jay Boice, jay.boice@huffingtonpost.com
 - Aaron Bycoffe, bycoffe@huffingtonpost.com
+- Gabriel Florit, gabriel.florit@globe.com
 
 ## Copyright
 
