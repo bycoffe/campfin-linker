@@ -103,9 +103,9 @@ class DB(object):
             if c['individual_id'] == None:
                 continue
             self.dbcs['linker'].execute("""
-              update %s set %s = %s where id = %s
+              update %s set %s = %s where %s = %s
               """ %
-              (self.tablename, self.table_config['individual_id'], c['individual_id'], c['id']))
+              (self.tablename, self.table_config['individual_id'], c['individual_id'], self.table_config['id'], c['id']))
         self.dbs['linker'].commit()
 
     def create_new_partial_matches(self, new_partial_matches):
